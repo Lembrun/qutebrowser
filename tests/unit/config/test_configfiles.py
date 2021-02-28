@@ -750,7 +750,7 @@ class ConfPy:
 
     def write(self, *lines):
         text = '\n'.join(lines)
-        self._file.write_text(text, 'utf-8', ensure=True)
+        self._file.write_text(text, 'utf-8')
 
     def read(self, error=False, warn_autoconfig=False):
         """Read the config.py via configfiles and check for errors."""

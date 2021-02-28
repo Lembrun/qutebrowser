@@ -642,7 +642,7 @@ class TestWritePy:
     def test_expanduser(self, commands, monkeypatch, tmp_path):
         """Make sure that using a path with ~/... works correctly."""
         home = tmp_path / 'home'
-        home.ensure(dir=True)
+        home.is_dir()
         monkeypatch.setenv('HOME', str(home))
 
         commands.config_write_py('~/config.py')
@@ -653,7 +653,7 @@ class TestWritePy:
 
     def test_existing_file(self, commands, tmp_path):
         confpy = tmp_path / 'config.py'
-        confpy.ensure()
+        confpy.exists()
 
         with pytest.raises(cmdutils.CommandError) as excinfo:
             commands.config_write_py(str(confpy))
@@ -663,7 +663,7 @@ class TestWritePy:
 
     def test_existing_file_force(self, commands, tmp_path):
         confpy = tmp_path / 'config.py'
-        confpy.ensure()
+        confpy.exists()
 
         commands.config_write_py(str(confpy), force=True)
 
