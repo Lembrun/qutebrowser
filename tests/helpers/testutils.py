@@ -23,7 +23,7 @@ import io
 import re
 import gzip
 import pprint
-import os.path
+import os
 import contextlib
 import pathlib
 import importlib.util
@@ -216,8 +216,8 @@ def pattern_match(*, pattern, value):
 
 def abs_datapath():
     """Get the absolute path to the end2end data directory."""
-    file_abs = os.path.abspath(os.path.dirname(__file__))
-    return os.path.join(file_abs, '..', 'end2end', 'data')
+    file_abs = pathlib.Path(__file__).parent.resolve()
+    return str(file_abs / '..' / 'end2end' / 'data')
 
 
 @contextlib.contextmanager
@@ -247,7 +247,7 @@ def ignore_bs4_warning():
 
 
 def _decompress_gzip_datafile(filename):
-    path = os.path.join(abs_datapath(), filename)
+    path = pathlib.Path(abs_datapath()) / filename
     yield from io.TextIOWrapper(gzip.open(path), encoding="utf-8")
 
 

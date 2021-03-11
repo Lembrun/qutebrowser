@@ -24,7 +24,7 @@
 See https://pytest.org/latest/fixture.html
 """
 
-
+import os
 import sys
 import tempfile
 import itertools
@@ -32,7 +32,7 @@ import textwrap
 import unittest.mock
 import types
 import mimetypes
-import os.path
+import pathlib
 import dataclasses
 
 import pytest
@@ -186,10 +186,9 @@ def testdata_scheme(qapp):
 
     @qutescheme.add_handler('testdata')
     def handler(url):  # pylint: disable=unused-variable
-        file_abs = os.path.abspath(os.path.dirname(__file__))
-        filename = os.path.join(file_abs, os.pardir, 'end2end',
-                                url.path().lstrip('/'))
-        with open(filename, 'rb') as f:
+        file_abs = pathlib.Path(__file__).parent.resolve()
+        filename = file_abs / '..' / 'end2end' / url.path().lstrip('/')
+        with filename.open('rb') as f:
             data = f.read()
 
         mimetype, _encoding = mimetypes.guess_type(filename)
@@ -546,44 +545,44 @@ def mode_manager(win_registry, config_stub, key_config_stub, qapp):
     objreg.delete('mode-manager', scope='window', window=0)
 
 
-def standarddir_tmpdir(folder, monkeypatch, tmpdir):
+def standarddir_tmpdir(folder, monkeypatch, tmp_path):
     """Set tmpdir/config as the configdir.
 
     Use this to avoid creating a 'real' config dir (~/.config/qute_test).
     """
-    confdir = tmpdir / folder
-    confdir.ensure(dir=True)
+    confdir = tmp_path / folder
+    confdir.mkdir(exist_ok=True)
     if hasattr(standarddir, folder):
         monkeypatch.setattr(standarddir, folder,
                             lambda **_kwargs: str(confdir))
-    return confdir
+    return str(confdir)
 
 
 @pytest.fixture
-def download_tmpdir(monkeypatch, tmpdir):
+def download_tmpdir(monkeypatch, tmp_path):
     """Set tmpdir/download as the downloaddir.
 
     Use this to avoid creating a 'real' download dir (~/.config/qute_test).
     """
-    return standarddir_tmpdir('download', monkeypatch, tmpdir)
+    return standarddir_tmpdir('download', monkeypatch, tmp_path)
 
 
 @pytest.fixture
-def config_tmpdir(monkeypatch, tmpdir):
+def config_tmpdir(monkeypatch, tmp_path):
     """Set tmpdir/config as the configdir.
 
     Use this to avoid creating a 'real' config dir (~/.config/qute_test).
     """
     monkeypatch.setattr(
         standarddir, 'config_py',
-        lambda **_kwargs: str(tmpdir / 'config' / 'config.py'))
-    return standarddir_tmpdir('config', monkeypatch, tmpdir)
+        lambda **_kwargs: str(tmp_path / 'config' / 'config.py'))
+    return standarddir_tmpdir('config', monkeypatch, tmp_path)
 
 
 @pytest.fixture
-def config_py_arg(tmpdir, monkeypatch):
+def config_py_arg(tmp_path, monkeypatch):
     """Set the config_py arg with a custom value for init."""
-    f = tmpdir / 'temp_config.py'
+    f = tmp_path / 'temp_config.py'
     monkeypatch.setattr(
         standarddir, 'config_py',
         lambda **_kwargs: str(f))
@@ -591,30 +590,30 @@ def config_py_arg(tmpdir, monkeypatch):
 
 
 @pytest.fixture
-def data_tmpdir(monkeypatch, tmpdir):
+def data_tmpdir(monkeypatch, tmp_path):
     """Set tmpdir/data as the datadir.
 
     Use this to avoid creating a 'real' data dir (~/.local/share/qute_test).
     """
-    return standarddir_tmpdir('data', monkeypatch, tmpdir)
+    return standarddir_tmpdir('data', monkeypatch, tmp_path)
 
 
 @pytest.fixture
-def runtime_tmpdir(monkeypatch, tmpdir):
+def runtime_tmpdir(monkeypatch, tmp_path):
     """Set tmpdir/runtime as the runtime dir.
 
     Use this to avoid creating a 'real' runtime dir.
     """
-    return standarddir_tmpdir('runtime', monkeypatch, tmpdir)
+    return standarddir_tmpdir('runtime', monkeypatch, tmp_path)
 
 
 @pytest.fixture
-def cache_tmpdir(monkeypatch, tmpdir):
+def cache_tmpdir(monkeypatch, tmp_path):
     """Set tmpdir/cache as the cachedir.
 
     Use this to avoid creating a 'real' cache dir (~/.cache/qute_test).
     """
-    return standarddir_tmpdir('cache', monkeypatch, tmpdir)
+    return standarddir_tmpdir('cache', monkeypatch, tmp_path)
 
 
 @pytest.fixture

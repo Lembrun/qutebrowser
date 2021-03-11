@@ -589,8 +589,8 @@ class FakeDownloadManager:
 
     """Mock browser.downloads.DownloadManager."""
 
-    def __init__(self, tmpdir):
-        self._tmpdir = tmpdir
+    def __init__(self, tmp_path):
+        self._tmp_path = tmp_path
         self.downloads = []
 
     @contextlib.contextmanager
@@ -612,7 +612,7 @@ class FakeDownloadManager:
         """
         with self._open_fileobj(target):
             download_item = FakeDownloadItem(target.fileobj, name=url.path())
-            with (self._tmpdir / url.path()).open('rb') as fake_url_file:
+            with (self._tmp_path / url.path()).open('rb') as fake_url_file:
                 shutil.copyfileobj(fake_url_file, download_item.fileobj)
         self.downloads.append(download_item)
         return download_item
