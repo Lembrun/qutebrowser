@@ -27,6 +27,7 @@ Module attributes:
 import html
 import json
 import os
+import pathlib
 import time
 import textwrap
 import urllib
@@ -497,8 +498,8 @@ def qute_pastebin_version(_url: QUrl) -> _HandlerRet:
 
 def _pdf_path(filename: str) -> str:
     """Get the path of a temporary PDF file."""
-    return os.path.join(downloads.temp_download_manager.get_tmpdir().name,
-                        filename)
+    return str(pathlib.Path(downloads.temp_download_manager.get_tmpdir().name
+                        / filename))
 
 
 @add_handler('pdfjs')
@@ -529,7 +530,7 @@ def qute_pdfjs(url: QUrl) -> _HandlerRet:
             raise UrlInvalidError("Missing filename")
 
         path = _pdf_path(filename)
-        if not os.path.isfile(path):
+        if not pathlib.Path(path).is_file():
             source = query.queryItemValue('source')
             if not source:  # This may happen with old URLs stored in history
                 raise UrlInvalidError("Missing source")

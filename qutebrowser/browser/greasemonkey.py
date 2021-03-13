@@ -20,7 +20,7 @@
 """Load, parse and make available Greasemonkey scripts."""
 
 import re
-import os
+import pathlib
 import json
 import fnmatch
 import functools
@@ -44,8 +44,8 @@ gm_manager = cast('GreasemonkeyManager', None)
 def _scripts_dirs():
     """Get the directory of the scripts."""
     return [
-        os.path.join(standarddir.data(), 'greasemonkey'),
-        os.path.join(standarddir.config(), 'greasemonkey'),
+        pathlib.Path(standarddir.data()) / 'greasemonkey',
+        pathlib.Path(standarddir.config()) / 'greasemonkey',
     ]
 
 
@@ -281,13 +281,13 @@ class GreasemonkeyManager(QObject):
         self._run_idle = []
 
         for scripts_dir in _scripts_dirs():
-            scripts_dir = os.path.abspath(scripts_dir)
+            scripts_dir = scripts_dir.resolve()
             log.greasemonkey.debug("Reading scripts from: {}".format(scripts_dir))
-            for script_filename in glob.glob(os.path.join(scripts_dir, '*.js')):
-                if not os.path.isfile(script_filename):
+            for script_filename in glob.glob(scripts_dir / '*.js'):
+                if not pathlib.Path(script_filename).is_file():
                     continue
-                script_path = os.path.join(scripts_dir, script_filename)
-                with open(script_path, encoding='utf-8-sig') as script_file:
+                script_path = scripts_dir / script_filename
+                with script_path.open(encoding='utf-8-sig') as script_file:
                     script = GreasemonkeyScript.parse(script_file.read(),
                                                       script_filename)
                     if not script.name:
@@ -329,10 +329,10 @@ class GreasemonkeyManager(QObject):
         log.greasemonkey.debug("Loaded script: {}".format(script.name))
 
     def _required_url_to_file_path(self, url):
-        requires_dir = os.path.join(_scripts_dirs()[0], 'requires')
-        if not os.path.exists(requires_dir):
-            os.mkdir(requires_dir)
-        return os.path.join(requires_dir, utils.sanitize_filename(url))
+        requires_dir = _scripts_dirs()[0] / 'requires'
+        if not requires_dir.exists():
+            requires_dir.mkdir()
+        return requires_dir / utils.sanitize_filename(url)
 
     def _on_required_download_finished(self, script, download):
         self._in_progress_dls.remove(download)
@@ -379,7 +379,7 @@ class GreasemonkeyManager(QObject):
                         for url in script.requires]
         if not force:
             required_dls = [(url, path) for (url, path) in required_dls
-                            if not os.path.exists(path)]
+                            if not pathlib.Path(path).exists()]
         if not required_dls:
             # All the required files exist already
             self._add_script_with_requires(script, quiet=True)
@@ -446,6 +446,6 @@ def init():
 
     for scripts_dir in _scripts_dirs():
         try:
-            os.mkdir(scripts_dir)
+            scripts_dir.mkdir()
         except FileExistsError:
             pass

@@ -20,7 +20,7 @@
 """Download manager."""
 
 import io
-import os.path
+import pathlib
 import shutil
 import functools
 import dataclasses
@@ -223,7 +223,7 @@ class DownloadItem(downloads.AbstractDownloadItem):
                                     force_overwrite, remember_directory):
         assert self._filename is not None
         no_action = functools.partial(self.cancel, remove_data=False)
-        url = 'file://{}'.format(os.path.dirname(self._filename))
+        url = 'file://{}'.format(pathlib.Path(self._filename).parent)
         message.confirm_async(title=title, text=msg,
                               yes_action=(lambda:
                                           self._after_create_parent_question(

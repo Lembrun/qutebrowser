@@ -25,8 +25,7 @@ OrderedDict. This is because we read them from a file at start and write them
 to a file on shutdown, so it makes sense to keep them as strings here.
 """
 
-import os
-import os.path
+import pathlib
 import html
 import functools
 import collections
@@ -128,9 +127,9 @@ class QuickmarkManager(UrlMarkManager):
             standarddir.config(), 'quickmarks', parent=self)
 
     def _init_savemanager(self, save_manager):
-        filename = os.path.join(standarddir.config(), 'quickmarks')
+        filename = pathlib.Path(standarddir.config()) / 'quickmarks'
         save_manager.add_saveable('quickmark-manager', self.save, self.changed,
-                                  filename=filename)
+                                  filename=str(filename))
 
     def _parse_line(self, line):
         try:
@@ -232,17 +231,17 @@ class BookmarkManager(UrlMarkManager):
     """
 
     def _init_lineparser(self):
-        bookmarks_directory = os.path.join(standarddir.config(), 'bookmarks')
-        os.makedirs(bookmarks_directory, exist_ok=True)
+        bookmarks_directory = pathlib.Path(standarddir.config() / 'bookmarks'
+        bookmarks_directory.mkdir(exist_ok=True)
 
-        bookmarks_subdir = os.path.join('bookmarks', 'urls')
+        bookmarks_subdir = pathlib.Path('bookmarks') / 'urls'
         self._lineparser = lineparser.LineParser(
-            standarddir.config(), bookmarks_subdir, parent=self)
+            standarddir.config(), str(bookmarks_subdir), parent=self)
 
     def _init_savemanager(self, save_manager):
-        filename = os.path.join(standarddir.config(), 'bookmarks', 'urls')
+        filename = pathlib.Path(standarddir.config()) / 'bookmarks' / 'urls'
         save_manager.add_saveable('bookmark-manager', self.save, self.changed,
-                                  filename=filename)
+                                  filename=str(filename))
 
     def _parse_line(self, line):
         parts = line.split(maxsplit=1)

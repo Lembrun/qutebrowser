@@ -19,7 +19,7 @@
 
 """Command dispatcher for TabbedBrowser."""
 
-import os.path
+import pathlib
 import shlex
 import functools
 from typing import cast, Callable, Dict, Union
@@ -1101,17 +1101,17 @@ class CommandDispatcher:
             caret = self._current_widget().caret
             caret.selection(callback=_selection_callback)
         else:
-            cmd = os.path.expanduser(cmd)
+            cmd = pathlib.Path(cmd).expanduser()
             proc = guiprocess.GUIProcess(what='command', verbose=verbose,
                                          output_messages=output_messages,
                                          parent=self._tabbed_browser)
             if detach:
-                ok = proc.start_detached(cmd, args)
+                ok = proc.start_detached(str(cmd), args)
                 if not ok:
                     message.info("Hint: Try without --detach for a more "
                                  "detailed error")
             else:
-                proc.start(cmd, args)
+                proc.start(str(cmd), args)
             proc.finished.connect(_on_proc_finished)
 
     def _run_userscript(self, selection, cmd, args, verbose, output_messages,
@@ -1700,13 +1700,12 @@ class CommandDispatcher:
         jseval_cb = None if quiet else self._jseval_cb
 
         if file:
-            path = os.path.expanduser(js_code)
-            if not os.path.isabs(path):
-                path = os.path.join(standarddir.data(), 'js', path)
+            path = pathlib.Path(js_code).expanduser()
+            if not path.is_absolute():
+                path = pathlib.Path(standarddir.data()) / 'js' / path
 
             try:
-                with open(path, 'r', encoding='utf-8') as f:
-                    js_code = f.read()
+                path.read_text(encoding='utf-8')
             except OSError as e:
                 raise cmdutils.CommandError(str(e))
         elif url:

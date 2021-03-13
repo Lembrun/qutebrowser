@@ -22,7 +22,7 @@
 import re
 import sys
 import html
-import os.path
+import pathlib
 import collections
 import functools
 import pathlib
@@ -102,7 +102,7 @@ def download_dir():
         ddir = directory
 
     try:
-        os.makedirs(ddir, exist_ok=True)
+        pathlib.Path(ddir).mkdir(exist_ok=True)
     except OSError as e:
         message.error("Failed to create download directory: {}".format(e))
 
@@ -137,11 +137,11 @@ def _path_suggestion(filename):
     suggestion = config.val.downloads.location.suggestion
     if suggestion == 'path':
         # add trailing '/' if not present
-        return os.path.join(download_dir(), '')
+        return str(pathlib.Path(download_dir() / "_"))[:-1]
     elif suggestion == 'filename':
         return filename
     elif suggestion == 'both':
-        return os.path.join(download_dir(), filename)
+        return str(pathlib.Path(download_dir()) / filename)
     else:  # pragma: no cover
         raise ValueError("Invalid suggestion value {}!".format(suggestion))
 
@@ -161,13 +161,13 @@ def create_full_filename(basename, filename):
     # Remove chars which can't be encoded in the filename encoding.
     # See https://github.com/qutebrowser/qutebrowser/issues/427
     encoding = sys.getfilesystemencoding()
-    filename = utils.force_encoding(filename, encoding)
-    if os.path.isabs(filename) and (os.path.isdir(filename) or
-                                    filename.endswith(os.sep)):
+    filename = pathlib.Path(utils.force_encoding(filename, encoding))
+    if filename.is_absolute() and filename.is_dir() or
+                                    str(filename).endswith(os.sep):
         # We got an absolute directory from the user, so we save it under
         # the default filename in that directory.
-        return os.path.join(filename, basename)
-    elif os.path.isabs(filename):
+        return filename / basename
+    elif filename.is_absolute():
         # We got an absolute filename from the user, so we save it under
         # that filename.
         return filename
@@ -226,7 +226,7 @@ def suggested_fn_from_title(url_path, title=None):
         not found in the whitelist (or if there is no page title).
     """
     ext_whitelist = [".html", ".htm", ".php", ""]
-    _, ext = os.path.splitext(url_path)
+    _, ext = pathlib.Path(url_path).suffix
 
     suggested_fn: Optional[str] = None
     if ext.lower() in ext_whitelist and title:
@@ -268,7 +268,7 @@ class FileDownloadTarget(_DownloadTarget):
         self.force_overwrite = force_overwrite
 
     def suggested_filename(self):
-        return os.path.basename(self.filename)
+        return pathlib.Path(self.filename).name
 
     def __str__(self):
         return self.filename
@@ -589,8 +589,8 @@ class AbstractDownloadItem(QObject):
     def delete(self):
         """Delete the downloaded file."""
         try:
-            if self._filename is not None and os.path.exists(self._filename):
-                os.remove(self._filename)
+            if self._filename is not None and pathlib.Path(self._filename).exists():
+                pathlib.Path(self._filename).unlink()
                 log.downloads.debug("Deleted {}".format(self._filename))
             else:
                 log.downloads.debug("Not deleting {}".format(self._filename))
@@ -638,7 +638,7 @@ class AbstractDownloadItem(QObject):
             log.downloads.error("No filename to open the download!")
             return
         if open_dir:
-            filename = os.path.dirname(filename)
+            filename = pathlib.Path(filename).parent
         # By using a singleshot timer, we ensure that we return fast. This
         # is important on systems where process creation takes long, as
         # otherwise the prompt might hang around and cause bugs
@@ -688,7 +688,7 @@ class AbstractDownloadItem(QObject):
             remember_directory: If True, remember the directory for future
                                 downloads.
         """
-        filename = os.path.expanduser(filename)
+        filename = pathlib.Path(filename).expanduser()
         self._ensure_can_set_filename(filename)
 
         self._filename = create_full_filename(self.basename, filename)
@@ -697,7 +697,7 @@ class AbstractDownloadItem(QObject):
             # from the user, so we append that to the default directory and
             # try again.
             self._filename = create_full_filename(
-                self.basename, os.path.join(download_dir(), filename))
+                self.basename, pathlib.Path(download_dir()) / filename)
 
         # At this point, we have a misconfigured XDG_DOWNLOAD_DIR, as
         # download_dir() + filename is still no absolute path.
@@ -712,13 +712,13 @@ class AbstractDownloadItem(QObject):
             )
             # fall back to $HOME as download_dir
             self._filename = create_full_filename(self.basename,
-                                                  os.path.expanduser('~'))
+                                                  str(pathlib.Path.home()))
 
-        dirname = os.path.dirname(self._filename)
-        if not os.path.exists(dirname):
+        dirname = self._filename.parent
+        if not dirname.exists():
             txt = ("<b>{}</b> does not exist. Create it?".
                    format(html.escape(
-                       os.path.join(dirname, ""))))
+                       dirname / "")))
             self._ask_create_parent_question("Create directory?", txt,
                                              force_overwrite,
                                              remember_directory)
@@ -739,13 +739,13 @@ class AbstractDownloadItem(QObject):
         global last_used_directory
 
         try:
-            os.makedirs(os.path.dirname(self._filename), exist_ok=True)
+            self._filename.parent.mkdir(exist_ok=True)
         except OSError as e:
             self._die(e.strerror)
 
-        self.basename = os.path.basename(self._filename)
+        self.basename = self._filename.name
         if remember_directory:
-            last_used_directory = os.path.dirname(self._filename)
+            last_used_directory = self._filename.parent
 
         log.downloads.debug("Setting filename to {}".format(self._filename))
         if self._get_conflicting_download():
@@ -756,15 +756,15 @@ class AbstractDownloadItem(QObject):
                 custom_yes_action=self._cancel_conflicting_download)
         elif force_overwrite:
             self._after_set_filename()
-        elif os.path.isfile(self._filename):
+        elif self._filename.is_file():
             # The file already exists, so ask the user if it should be
             # overwritten.
             txt = "<b>{}</b> already exists. Overwrite?".format(
                 html.escape(self._filename))
             self._ask_confirm_question("Overwrite existing file?", txt)
         # FIFO, device node, etc. Make sure we want to do this
-        elif (os.path.exists(self._filename) and
-              not os.path.isdir(self._filename)):
+        elif self._filename.exists() and
+              not self._filename.is_dir():
             txt = ("<b>{}</b> already exists and is a special file. Write to "
                    "it anyways?".format(html.escape(self._filename)))
             self._ask_confirm_question("Overwrite special file?", txt)
@@ -816,7 +816,7 @@ class AbstractDownloadItem(QObject):
         if filename is None:  # pragma: no cover
             log.downloads.error("No filename to open the download!")
             return
-        self.pdfjs_requested.emit(os.path.basename(filename),
+        self.pdfjs_requested.emit(pathlib.Path(filename).name,
                                   self.url())
 
     def set_target(self, target):

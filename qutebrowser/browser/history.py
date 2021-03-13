@@ -19,7 +19,7 @@
 
 """Simple history which gets written to disk."""
 
-import os
+import pathlib
 import time
 import contextlib
 from typing import cast, Mapping, MutableSequence
@@ -441,14 +441,13 @@ def debug_dump_history(dest):
     Args:
         dest: Where to write the file to.
     """
-    dest = os.path.expanduser(dest)
+    dest = pathlib.Path(dest).expanduser()
 
     lines = (f'{int(x.atime)}{"-r" * x.redirect} {x.url} {x.title}'
              for x in web_history.select(sort_by='atime', sort_order='asc'))
 
     try:
-        with open(dest, 'w', encoding='utf-8') as f:
-            f.write('\n'.join(lines))
+        dest.write_text('\n'.join(lines), encoding='utf-8')
         message.info(f"Dumped history to {dest}")
     except OSError as e:
         raise cmdutils.CommandError(f'Could not write history: {e}')
