@@ -22,9 +22,9 @@
 
 import sys
 import os
-import os.path
+import pathlib
 import subprocess
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), os.pardir))
+sys.path.insert(0, str(pathlib.Path(__file__).parent / '..'))
 
 
 if sys.hexversion >= 0x03000000:
@@ -34,8 +34,7 @@ else:
     open_file = codecs.open
 
 
-BASEDIR = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                       os.path.pardir)
+BASEDIR = pathlib.Path(__file__).resolve().parent / '..'
 
 
 def _call_git(gitpath, *args):
@@ -55,7 +54,7 @@ def _git_str():
     """
     if BASEDIR is None:
         return None
-    if not os.path.isdir(os.path.join(BASEDIR, ".git")):
+    if not (BASEDIR / ".git").is_dir():
         return None
     try:
         # https://stackoverflow.com/questions/21017300/21017394#21017394
@@ -73,6 +72,6 @@ def write_git_file():
     gitstr = _git_str()
     if gitstr is None:
         gitstr = ''
-    path = os.path.join(BASEDIR, 'qutebrowser', 'git-commit-id')
-    with open_file(path, 'w', encoding='ascii') as f:
+    path = BASEDIR / 'qutebrowser' / 'git-commit-id'
+    with path.open('w', encoding='ascii') as f:
         f.write(gitstr)

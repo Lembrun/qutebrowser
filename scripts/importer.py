@@ -30,7 +30,7 @@ profiles, and Mozilla profiles is supported.
 import argparse
 import textwrap
 import sqlite3
-import os
+import pathlib
 import urllib.parse
 import json
 import string
@@ -281,7 +281,7 @@ def import_moz_places(profile, bookmark_types, output_format):
     def search_conv(url):
         return search_escape(url).replace('%s', '{}')
 
-    places = sqlite3.connect(os.path.join(profile, "places.sqlite"))
+    places = sqlite3.connect(pathlib.Path(profile) / "places.sqlite")
     places.create_function('search_conv', 1, search_conv)
     places.row_factory = sqlite3.Row
     c = places.cursor()
@@ -298,6 +298,7 @@ def import_chrome(profile, bookmark_types, output_format):
     their own database table; bookmarks cannot have associated keywords. This
     is why the dictionary lookups here are much simpler.
     """
+    profile = pathlib.Path(profile)
     out_template = {
         'bookmark': '{url} {name}',
         'quickmark': '{name} {url}',
@@ -306,7 +307,7 @@ def import_chrome(profile, bookmark_types, output_format):
     }
 
     if 'search' in bookmark_types:
-        webdata = sqlite3.connect(os.path.join(profile, 'Web Data'))
+        webdata = sqlite3.connect(profile / 'Web Data')
         c = webdata.cursor()
         c.execute('SELECT keyword,url FROM keywords;')
         for keyword, url in c:
@@ -319,7 +320,7 @@ def import_chrome(profile, bookmark_types, output_format):
                       format(keyword))
 
     else:
-        with open(os.path.join(profile, 'Bookmarks'), encoding='utf-8') as f:
+        with (profile / 'Bookmarks').open(encoding='utf-8') as f:
             bookmarks = json.load(f)
 
         def bm_tree_walk(bm, template):

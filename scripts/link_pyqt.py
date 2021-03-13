@@ -21,7 +21,7 @@
 """Symlink PyQt into a given virtualenv."""
 
 import os
-import os.path
+import pathlib
 import argparse
 import shutil
 import sys
@@ -68,21 +68,21 @@ def get_ignored_files(directory, files):
     ignored_dirs = ('examples', 'qml', 'uic', 'doc')
     filtered = []
     for f in files:
-        ext = os.path.splitext(f)[1]
-        full_path = os.path.join(directory, f)
-        if os.path.isdir(full_path) and f in ignored_dirs:
+        ext = pathlib.Path(f).suffix
+        full_path = pathlib.Path(directory) / f
+        if full_path.is_dir() and f in ignored_dirs:
             filtered.append(f)
-        elif (ext not in needed_exts) and os.path.isfile(full_path):
+        elif (ext not in needed_exts) and full_path.is_file():
             filtered.append(f)
     return filtered
 
 
 def needs_update(source, dest):
     """Check if a file to be linked/copied needs to be updated."""
-    if os.path.islink(dest):
+    if pathlib.Path(dest).is_symlink():
         # No need to delete a link and relink -> skip this
         return False
-    elif os.path.isdir(dest):
+    elif pathlib.Path(dest).is_dir():
         diffs = filecmp.dircmp(source, dest)
         ignored = get_ignored_files(source, diffs.left_only)
         has_new_files = set(ignored) != set(diffs.left_only)
@@ -143,16 +143,16 @@ def link_pyqt(executable, venv_path):
         sip_file = None
 
     sipconfig_file = get_lib_path(executable, 'sipconfig', required=False)
-    pyqt_dir = os.path.dirname(get_lib_path(executable, 'PyQt5.QtCore'))
+    pyqt_dir = pathlib.Path(get_lib_path(executable, 'PyQt5.QtCore')).parent
 
     for path in [sip_file, sipconfig_file, pyqt_dir]:
         if path is None:
             continue
 
-        fn = os.path.basename(path)
-        dest = os.path.join(venv_path, fn)
+        fn = pathlib.Path(path).name
+        dest = pathlib.Path(venv_path) / fn
 
-        if os.path.exists(dest):
+        if dest.exists():
             if needs_update(path, dest):
                 remove(dest)
             else:
@@ -164,7 +164,7 @@ def link_pyqt(executable, venv_path):
 def copy_or_link(source, dest):
     """Copy or symlink source to dest."""
     if os.name == 'nt':
-        if os.path.isdir(source):
+        if pathlib.Path(source).is_dir():
             print('{} -> {}'.format(source, dest))
             shutil.copytree(source, dest, ignore=get_ignored_files,
                             copy_function=verbose_copy)
@@ -173,21 +173,21 @@ def copy_or_link(source, dest):
             shutil.copy(source, dest)
     else:
         print('{} -> {}'.format(source, dest))
-        os.symlink(source, dest)
+        pathlib.Path(dest).symlink_to(source)
 
 
 def remove(filename):
     """Remove a given filename, regardless of whether it's a file or dir."""
-    if os.path.isdir(filename):
+    if pathlib.Path(filename).is_dir():
         shutil.rmtree(filename)
     else:
-        os.unlink(filename)
+        pathlib.Path(filename).unlink()
 
 
 def get_venv_lib_path(path):
     """Get the library path of a virtualenv."""
     subdir = 'Scripts' if os.name == 'nt' else 'bin'
-    executable = os.path.join(path, subdir, 'python')
+    executable = pathlib.Path(path) / subdir / 'python'
     return run_py(executable,
                   'from distutils.sysconfig import get_python_lib',
                   'print(get_python_lib())')
@@ -195,8 +195,8 @@ def get_venv_lib_path(path):
 
 def get_tox_syspython(tox_path):
     """Get the system python based on a virtualenv created by tox."""
-    path = os.path.join(tox_path, '.tox-config1')
-    with open(path, encoding='ascii') as f:
+    path = pathlib.Path(tox_path) / '.tox-config1'
+    with path.open(encoding='ascii') as f:
         line = f.readline()
     _md5, sys_python = line.rstrip().split(' ', 1)
     return sys_python

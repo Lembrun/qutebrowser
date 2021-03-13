@@ -20,7 +20,7 @@
 """Utility functions for scripts."""
 
 import os
-import os.path
+import pathlib
 import sys
 import contextlib
 
@@ -91,9 +91,9 @@ def print_subtitle(text):
 
 def change_cwd():
     """Change the scripts cwd if it was started inside the script folder."""
-    cwd = os.getcwd()
-    if os.path.split(cwd)[1] == 'scripts':
-        os.chdir(os.path.join(cwd, os.pardir))
+    cwd = pathlib.Path.cwd()
+    if cwd.parts[3] == 'scripts':
+        os.chdir(cwd / '..')
 
 
 @contextlib.contextmanager

@@ -26,13 +26,12 @@ import pathlib
 import sys
 import re
 import os
-import os.path
 import shutil
 import venv as pyvenv
 import subprocess
 from typing import List, Optional, Tuple, Dict, Union
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), os.pardir))
+sys.path.insert(0, str(pathlib.Path(__file__).parent / '..'))
 from scripts import utils, link_pyqt
 
 

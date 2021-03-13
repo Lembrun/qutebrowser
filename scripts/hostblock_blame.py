@@ -23,10 +23,10 @@
 import sys
 import io
 import os
-import os.path
+import pathlib
 import urllib.request
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), os.pardir))
+sys.path.insert(0, str(pathlib.Path(__file__) / '..'))
 from qutebrowser.components import hostblock
 from qutebrowser.config import configdata
 

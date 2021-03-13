@@ -26,7 +26,7 @@
 import argparse
 import sqlite3
 import sys
-import os
+import pathlib
 
 
 class Error(Exception):
@@ -67,7 +67,7 @@ def parse():
 
 def open_db(data_base):
     """Open connection with database."""
-    if os.path.isfile(data_base):
+    if pathlib.Path(data_base).is_file():
         return sqlite3.connect(data_base)
     raise Error('The file {} does not exist.'.format(data_base))
 

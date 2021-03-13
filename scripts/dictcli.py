@@ -28,13 +28,14 @@ import argparse
 import base64
 import json
 import os
+import pathlib
 import sys
 import re
 import urllib.request
 import dataclasses
 from typing import Optional
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), os.pardir))
+sys.path.insert(0, str(pathlib.Path(__file__).parent / '..'))
 from qutebrowser.browser.webengine import spell
 from qutebrowser.config import configdata
 from qutebrowser.utils import standarddir
@@ -202,12 +203,12 @@ def filter_languages(languages, selected):
 def install_lang(lang):
     """Install a single lang given by the argument."""
     lang_url = API_URL + lang.remote_filename + '?format=TEXT'
-    if not os.path.isdir(spell.dictionary_dir()):
+    if not pathlib.Path(spell.dictionary_dir()).is_dir():
         msg = '{} does not exist, creating the directory'
         print(msg.format(spell.dictionary_dir()))
         os.makedirs(spell.dictionary_dir())
     print('Downloading {}'.format(lang_url))
-    dest = os.path.join(spell.dictionary_dir(), lang.remote_filename)
+    dest = pathlib.Path(spell.dictionary_dir()) / lang.remote_filename
     download_dictionary(lang_url, dest)
     print('Installed to {}.'.format(dest))
 
@@ -237,7 +238,7 @@ def remove_old(languages):
     for lang in installed:
         local_files = spell.local_files(lang.code)
         for old_file in local_files[1:]:
-            os.remove(os.path.join(spell.dictionary_dir(), old_file))
+            os.remove(pathlib.Path(spell.dictionary_dir()) / old_file)
 
 
 def main():
