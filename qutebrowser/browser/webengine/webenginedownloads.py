@@ -20,7 +20,7 @@
 """QtWebEngine specific code for downloads."""
 
 import re
-import os.path
+import pathlib
 import functools
 
 from PyQt5.QtCore import pyqtSlot, Qt, QUrl, QObject
@@ -157,7 +157,7 @@ class DownloadItem(downloads.AbstractDownloadItem):
         question = usertypes.Question()
         question.title = title
         question.text = msg
-        question.url = 'file://{}'.format(os.path.dirname(self._filename))
+        question.url = 'file://{}'.format(pathlib.Path(self._filename).parent)
         question.mode = usertypes.PromptMode.yesno
         question.answered_yes.connect(lambda:
                                       self._after_create_parent_question(
@@ -171,11 +171,11 @@ class DownloadItem(downloads.AbstractDownloadItem):
     def _after_set_filename(self):
         assert self._filename is not None
 
-        dirname, basename = os.path.split(self._filename)
+        dirname, basename = pathlib.Path(self._filename).parts
         try:
             # Qt 5.14
-            self._qt_item.setDownloadDirectory(dirname)
-            self._qt_item.setDownloadFileName(basename)
+            self._qt_item.setDownloadDirectory(dirname[1])
+            self._qt_item.setDownloadFileName(basename[2])
         except AttributeError:
             self._qt_item.setPath(self._filename)
 
@@ -248,7 +248,7 @@ class DownloadManager(downloads.AbstractDownloadManager):
     @pyqtSlot(QWebEngineDownloadItem)
     def handle_download(self, qt_item):
         """Start a download coming from a QWebEngineProfile."""
-        qt_filename = os.path.basename(qt_item.path())   # FIXME use 5.14 API
+        qt_filename = pathlib.Path(qt_item.path()).name   # FIXME use 5.14 API
         mime_type = qt_item.mimeType()
         url = qt_item.url()
 

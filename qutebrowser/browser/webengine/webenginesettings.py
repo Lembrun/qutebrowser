@@ -24,7 +24,7 @@ Module attributes:
                 constants.
 """
 
-import os
+import pathlib
 import operator
 from typing import cast, Any, List, Optional, Tuple, Union, TYPE_CHECKING
 
@@ -322,7 +322,7 @@ class ProfileSetter:
                                     "sources".format(code))
                 continue
 
-            filenames.append(os.path.splitext(local_filename)[0])
+            filenames.append(pathlib.Path(local_filename).suffix)
 
         log.config.debug("Found dicts: {}".format(filenames))
         self._profile.setSpellCheckLanguages(filenames)
@@ -377,9 +377,9 @@ def _init_default_profile():
     init_user_agent()
 
     default_profile.setCachePath(
-        os.path.join(standarddir.cache(), 'webengine'))
+        str(pathlib.Path(standarddir.cache()) / 'webengine'))
     default_profile.setPersistentStoragePath(
-        os.path.join(standarddir.data(), 'webengine'))
+        str(pathlib.Path(standarddir.data()) / 'webengine'))
 
     _init_profile(default_profile)
 

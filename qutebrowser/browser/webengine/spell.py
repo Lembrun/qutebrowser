@@ -22,7 +22,7 @@
 
 import glob
 import os
-import os.path
+import pathlib
 import re
 
 from qutebrowser.utils import log, message, standarddir
@@ -42,7 +42,7 @@ def version(filename):
 
 def dictionary_dir():
     """Return the path (str) to the QtWebEngine's dictionaries directory."""
-    return os.path.join(standarddir.data(), 'qtwebengine_dictionaries')
+    return pathlib.Path(standarddir.data()) / 'qtwebengine_dictionaries'
 
 
 def local_files(code):
@@ -51,13 +51,13 @@ def local_files(code):
     The returned dictionaries are sorted by version, therefore the latest will
     be the first element. The list will be empty if no dictionaries are found.
     """
-    pathname = os.path.join(dictionary_dir(), '{}*.bdic'.format(code))
+    pathname = dictionary_dir() / '{}*.bdic'.format(code)
     matching_dicts = glob.glob(pathname)
     versioned_dicts = []
     for matching_dict in matching_dicts:
         parsed_version = version(matching_dict)
         if parsed_version is not None:
-            filename = os.path.basename(matching_dict)
+            filename = pathlib.Path(matching_dict).name
             log.config.debug('Found file for dict {}: {}'
                              .format(code, filename))
             versioned_dicts.append((parsed_version, filename))
@@ -78,4 +78,4 @@ def local_filename(code):
 def init():
     """Initialize the dictionary path."""
     dict_dir = dictionary_dir()
-    os.environ['QTWEBENGINE_DICTIONARIES_PATH'] = dict_dir
+    os.environ['QTWEBENGINE_DICTIONARIES_PATH'] = str(dict_dir)
