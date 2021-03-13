@@ -21,7 +21,6 @@
 """Data used by setup.py and the PyInstaller qutebrowser.spec."""
 
 import sys
-import os
 import pathlib
 import subprocess
 sys.path.insert(0, str(pathlib.Path(__file__).parent / '..'))

@@ -22,7 +22,6 @@
 
 import sys
 import io
-import os
 import pathlib
 import urllib.request
 

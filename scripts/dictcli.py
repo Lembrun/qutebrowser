@@ -27,7 +27,6 @@ Use: python -m scripts.dictcli [-h] {list,update,remove-old,install} ...
 import argparse
 import base64
 import json
-import os
 import pathlib
 import sys
 import re
@@ -206,7 +205,7 @@ def install_lang(lang):
     if not pathlib.Path(spell.dictionary_dir()).is_dir():
         msg = '{} does not exist, creating the directory'
         print(msg.format(spell.dictionary_dir()))
-        os.makedirs(spell.dictionary_dir())
+        pathlib.Path(spell.dictionary_dir()).mkdir(parents=True)
     print('Downloading {}'.format(lang_url))
     dest = pathlib.Path(spell.dictionary_dir()) / lang.remote_filename
     download_dictionary(lang_url, dest)
@@ -238,7 +237,7 @@ def remove_old(languages):
     for lang in installed:
         local_files = spell.local_files(lang.code)
         for old_file in local_files[1:]:
-            os.remove(pathlib.Path(spell.dictionary_dir()) / old_file)
+            (pathlib.Path(spell.dictionary_dir()) / old_file).unlink()
 
 
 def main():

@@ -281,7 +281,7 @@ def import_moz_places(profile, bookmark_types, output_format):
     def search_conv(url):
         return search_escape(url).replace('%s', '{}')
 
-    places = sqlite3.connect(pathlib.Path(profile) / "places.sqlite")
+    places = sqlite3.connect(str(pathlib.Path(profile) / "places.sqlite"))
     places.create_function('search_conv', 1, search_conv)
     places.row_factory = sqlite3.Row
     c = places.cursor()

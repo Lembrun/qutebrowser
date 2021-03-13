@@ -47,7 +47,7 @@ def run_py(executable, *code):
             ret = subprocess.run(cmd, universal_newlines=True, check=True,
                                  stdout=subprocess.PIPE).stdout
         finally:
-            os.remove(filename)
+            pathlib.Path(filename).unlink()
     else:
         cmd = [executable, '-c', '\n'.join(code)]
         ret = subprocess.run(cmd, universal_newlines=True, check=True,
