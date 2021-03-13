@@ -25,12 +25,11 @@ https://bitbucket.org/logilab/pylint/issue/512/
 """
 
 import os
-import os.path
+import pathlib
 import sys
 import subprocess
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), os.pardir,
-                                os.pardir))
+sys.path.insert(0, str(pathlib.Path(__file__).parent / '..' / '..'))
 
 from scripts import utils
 
@@ -45,8 +44,8 @@ def main():
     files = []
     for dirpath, _dirnames, filenames in os.walk('tests'):
         for fn in filenames:
-            if os.path.splitext(fn)[1] == '.py':
-                files.append(os.path.join(dirpath, fn))
+            if pathlib.Path(fn).suffix == '.py':
+                files.append(pathlib.Path(dirpath) / fn)
 
     disabled = [
         # pytest fixtures

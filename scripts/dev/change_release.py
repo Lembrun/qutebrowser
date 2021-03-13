@@ -22,7 +22,7 @@
 
 import sys
 import argparse
-import os.path
+import pathlib
 
 import github3
 import github3.exceptions
@@ -35,8 +35,8 @@ class Error(Exception):
 
 def read_github_token():
     """Read the GitHub API token from disk."""
-    token_file = os.path.join(os.path.expanduser('~'), '.gh_token')
-    with open(token_file, encoding='ascii') as f:
+    token_file = pathlib.Path.home() / '.gh_token'
+    with token_file.open(encoding='ascii') as f:
         token = f.read().strip()
     return token
 

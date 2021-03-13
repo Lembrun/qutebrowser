@@ -22,7 +22,7 @@
 
 import sys
 import cProfile
-import os.path
+import pathlib
 import os
 import tempfile
 import subprocess
@@ -30,8 +30,7 @@ import shutil
 import argparse
 import shlex
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), os.pardir,
-                                os.pardir))
+sys.path.insert(0, str(pathlib.Path(__file__).parent / '..' / '..'))
 
 import qutebrowser.qutebrowser
 
@@ -61,9 +60,9 @@ def main():
     tempdir = tempfile.mkdtemp()
 
     if args.profile_tool == 'none':
-        profilefile = os.path.join(os.getcwd(), args.profile_file)
+        profilefile = pathlib.Path.cwd() / args.profile_file
     else:
-        profilefile = os.path.join(tempdir, 'profile')
+        profilefile = pathlib.Path(tempdir) / 'profile'
 
     sys.argv = [sys.argv[0]] + remaining
 
@@ -78,7 +77,7 @@ def main():
     # If we have an exception after here, we don't want the qutebrowser
     # exception hook to take over.
     sys.excepthook = sys.__excepthook__
-    profiler.dump_stats(profilefile)
+    profiler.dump_stats(str(profilefile))
 
     if args.profile_tool == 'none':
         print("Profile data written to {}".format(profilefile))
@@ -86,15 +85,15 @@ def main():
         # yep, shell=True. I know what I'm doing.
         subprocess.run(
             'gprof2dot -f pstats {} | dot -Tpng | feh -F -'.format(
-                shlex.quote(profilefile)), shell=True, check=True)
+                shlex.quote(str(profilefile)), shell=True, check=True)
     elif args.profile_tool == 'kcachegrind':
-        callgraphfile = os.path.join(tempdir, 'callgraph')
-        subprocess.run(['pyprof2calltree', '-k', '-i', profilefile,
-                        '-o', callgraphfile], check=True)
+        callgraphfile = pathlib.Path(tempdir) / 'callgraph'
+        subprocess.run(['pyprof2calltree', '-k', '-i', str(profilefile),
+                        '-o', str(callgraphfile)], check=True)
     elif args.profile_tool == 'snakeviz':
-        subprocess.run(['snakeviz', profilefile], check=True)
+        subprocess.run(['snakeviz', str(profilefile)], check=True)
     elif args.profile_tool == 'tuna':
-        subprocess.run(['tuna', profilefile], check=True)
+        subprocess.run(['tuna', str(profilefile)], check=True)
 
     shutil.rmtree(tempdir)
 

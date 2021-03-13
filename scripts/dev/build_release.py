@@ -22,7 +22,7 @@
 
 
 import os
-import os.path
+import pathlib
 import sys
 import time
 import shutil
@@ -39,8 +39,7 @@ try:
 except ImportError:
     pass
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), os.pardir,
-                                os.pardir))
+sys.path.insert(0, str(pathlib.Path(__file__) / '..' / '..'))
 
 import qutebrowser
 from scripts import utils
@@ -55,8 +54,8 @@ def call_script(name, *args, python=sys.executable):
         *args: The arguments to pass.
         python: The python interpreter to use.
     """
-    path = os.path.join(os.path.dirname(__file__), os.pardir, name)
-    subprocess.run([python, path] + list(args), check=True)
+    path = pathlib.Path(__file__).parent / '..' / name
+    subprocess.run([python, str(path)] + list(args), check=True)
 
 
 def call_tox(toxenv, *args, python=sys.executable):
@@ -69,7 +68,8 @@ def call_tox(toxenv, *args, python=sys.executable):
     """
     env = os.environ.copy()
     env['PYTHON'] = python
-    env['PATH'] = os.environ['PATH'] + os.pathsep + os.path.dirname(python)
+    env['PATH'] = os.environ['PATH'] + os.pathsep
+    + str(pathlib.Path(python).parent)
     subprocess.run(
         [sys.executable, '-m', 'tox', '-vv', '-e', toxenv] + list(args),
         env=env, check=True)
@@ -162,34 +162,34 @@ def patch_windows_exe(exe_path):
 
 def patch_mac_app():
     """Patch .app to use our Info.plist and save some space."""
-    app_path = os.path.join('dist', 'qutebrowser.app')
+    app_path = pathlib.Path('dist') / 'qutebrowser.app'
 
     # Patch Info.plist - pyinstaller's options are too limiting
-    plist_path = os.path.join(app_path, 'Contents', 'Info.plist')
-    with open(plist_path, "rb") as f:
+    plist_path = app_path / 'Contents' / 'Info.plist'
+    with plist_path.open("rb") as f:
         plist_data = plistlib.load(f)
     plist_data.update(INFO_PLIST_UPDATES)
-    with open(plist_path, "wb") as f:
+    with plist_path.open("wb") as f:
         plistlib.dump(plist_data, f)
 
     # Replace some duplicate files by symlinks
-    framework_path = os.path.join(app_path, 'Contents', 'MacOS', 'PyQt5',
-                                  'Qt', 'lib', 'QtWebEngineCore.framework')
+    framework_path = app_path / 'Contents' / 'MacOS' / 'PyQt5'
+    / 'Qt' / 'lib' / 'QtWebEngineCore.framework'
 
-    core_lib = os.path.join(framework_path, 'Versions', '5', 'QtWebEngineCore')
+    core_lib = framework_path / 'Versions' / '5' / 'QtWebEngineCore'
     os.remove(core_lib)
-    core_target = os.path.join(*[os.pardir] * 7, 'MacOS', 'QtWebEngineCore')
-    os.symlink(core_target, core_lib)
+    core_target = pathlib.Path(*['..'] * 7) / 'MacOS' / 'QtWebEngineCore'
+    core_lib.symlink_to(core_target)
 
-    framework_resource_path = os.path.join(framework_path, 'Resources')
-    for name in os.listdir(framework_resource_path):
-        file_path = os.path.join(framework_resource_path, name)
-        target = os.path.join(*[os.pardir] * 5, name)
-        if os.path.isdir(file_path):
+    framework_resource_path = framework_path / 'Resources'
+    for name in framework_resource_path.iterdir():
+        file_path = framework_resource_path / name
+        target = pathlib.Path(*['..'] * 5) / name
+        if file_path.is_dir():
             shutil.rmtree(file_path)
         else:
             os.remove(file_path)
-        os.symlink(target, file_path)
+        file_path.symlink_to(target)
 
 
 INFO_PLIST_UPDATES = {
@@ -239,7 +239,7 @@ def build_mac():
     subprocess.run(['make', '-f', 'scripts/dev/Makefile-dmg'], check=True)
 
     dmg_name = 'qutebrowser-{}.dmg'.format(qutebrowser.__version__)
-    os.rename('qutebrowser.dmg', dmg_name)
+    pathlib.Path('qutebrowser.dmg').rename(dmg_name)
 
     utils.print_title("Running smoke test")
 
@@ -248,9 +248,9 @@ def build_mac():
             subprocess.run(['hdiutil', 'attach', dmg_name,
                             '-mountpoint', tmpdir], check=True)
             try:
-                binary = os.path.join(tmpdir, 'qutebrowser.app', 'Contents',
-                                      'MacOS', 'qutebrowser')
-                smoke_test(binary)
+                binary = pathlib.Path(tmpdir) / 'qutebrowser.app' / 'Contents'
+                / 'MacOS' / 'qutebrowser'
+                smoke_test(str(binary))
             finally:
                 print("Waiting 10s for dmg to be detachable...")
                 time.sleep(10)
@@ -288,22 +288,22 @@ def _build_windows_single(*, x64, skip_packaging):
     human_arch = '64-bit' if x64 else '32-bit'
     utils.print_title(f"Running pyinstaller {human_arch}")
 
-    outdir = os.path.join(
-        'dist', f'qutebrowser-{qutebrowser.__version__}-{"x64" if x64 else "x86"}')
-    _maybe_remove(outdir)
+    outdir = pathlib.Path('dist') /
+    f'qutebrowser-{qutebrowser.__version__}-{"x64" if x64 else "x86"}'
+    _maybe_remove(str(outdir))
 
     python = _get_windows_python_path(x64=x64)
     call_tox(f'pyinstaller-{"64" if x64 else "32"}', '-r', python=python)
 
-    out_pyinstaller = os.path.join('dist', 'qutebrowser')
-    shutil.move(out_pyinstaller, outdir)
-    exe_path = os.path.join(outdir, 'qutebrowser.exe')
+    out_pyinstaller = pathlib.Path('dist') / 'qutebrowser'
+    shutil.move(str(out_pyinstaller), str(outdir))
+    exe_path = outdir / 'qutebrowser.exe'
 
     utils.print_title(f"Patching {human_arch} exe")
-    patch_windows_exe(exe_path)
+    patch_windows_exe(str(exe_path))
 
     utils.print_title(f"Running {human_arch} smoke test")
-    smoke_test(exe_path)
+    smoke_test(str(exe_path))
 
     if skip_packaging:
         return []
@@ -311,7 +311,7 @@ def _build_windows_single(*, x64, skip_packaging):
     utils.print_title(f"Packaging {human_arch}")
     return _package_windows_single(
         nsis_flags=[] if x64 else ['/DX86'],
-        outdir=outdir,
+        outdir=str(outdir),
         filename_arch='amd64' if x64 else 'win32',
         desc_arch=human_arch,
         desc_suffix='' if x64 else ' (only for 32-bit Windows!)',
@@ -356,7 +356,7 @@ def _package_windows_single(
                     'misc/nsis/qutebrowser.nsi'], check=True)
     name = f'qutebrowser-{qutebrowser.__version__}-{filename_arch}.exe'
     artifacts.append((
-        os.path.join('dist', name),
+        str(pathlib.Path('dist') / name),
         'application/vnd.microsoft.portable-executable',
         f'Windows {desc_arch} installer{desc_suffix}',
     ))
@@ -364,8 +364,8 @@ def _package_windows_single(
     utils.print_subtitle(f"Zipping {desc_arch} standalone...")
     zip_name = (
         f'qutebrowser-{qutebrowser.__version__}-windows-standalone-{filename_arch}')
-    zip_path = os.path.join('dist', zip_name)
-    shutil.make_archive(zip_path, 'zip', 'dist', os.path.basename(outdir))
+    zip_path = pathlib.Path('dist') / zip_name
+    shutil.make_archive(str(zip_path), 'zip', 'dist', pathlib.Path(outdir).name)
     artifacts.append((
         f'{zip_path}.zip',
         'application/zip',
@@ -382,11 +382,11 @@ def build_sdist():
     _maybe_remove('dist')
 
     subprocess.run([sys.executable, 'setup.py', 'sdist'], check=True)
-    dist_files = os.listdir(os.path.abspath('dist'))
-    assert len(dist_files) == 1
+    dist_files = pathlib.Path('dist').resolve().iterdir()
+    assert len(list(dist_files)) == 1
 
-    dist_file = os.path.join('dist', dist_files[0])
-    subprocess.run(['gpg', '--detach-sign', '-a', dist_file], check=True)
+    dist_file = pathlib.Path('dist') / dist_files[0]
+    subprocess.run(['gpg', '--detach-sign', '-a', str(dist_file)], check=True)
 
     tar = tarfile.open(dist_file)
     by_ext = collections.defaultdict(list)
@@ -395,7 +395,7 @@ def build_sdist():
         if not tarinfo.isfile():
             continue
         name = os.sep.join(tarinfo.name.split(os.sep)[1:])
-        _base, ext = os.path.splitext(name)
+        _base, ext = pathlib.Path(name).suffix
         by_ext[ext].append(name)
 
     assert '.pyc' not in by_ext
@@ -408,8 +408,8 @@ def build_sdist():
 
     filename = 'qutebrowser-{}.tar.gz'.format(qutebrowser.__version__)
     artifacts = [
-        (os.path.join('dist', filename), 'application/gzip', 'Source release'),
-        (os.path.join('dist', filename + '.asc'), 'application/pgp-signature',
+        (str(pathlib.Path('dist' /) filename), 'application/gzip', 'Source release'),
+        (str(pathlib.Path('dist') / filename.with_suffix('.asc'))), 'application/pgp-signature',
          'Source release - PGP signature'),
     ]
 
@@ -426,8 +426,8 @@ def test_makefile():
 
 def read_github_token():
     """Read the GitHub API token from disk."""
-    token_file = os.path.join(os.path.expanduser('~'), '.gh_token')
-    with open(token_file, encoding='ascii') as f:
+    token_file = pathlib.Path.home() / '.gh_token'
+    with token_file.open(encoding='ascii') as f:
         token = f.read().strip()
     return token
 
@@ -458,7 +458,7 @@ def github_upload(artifacts, tag):
         while True:
             print("Uploading {}".format(filename))
 
-            basename = os.path.basename(filename)
+            basename = pathlib.Path(filename).name
             assets = [asset for asset in release.assets()
                       if asset.name == basename]
             if assets:
@@ -533,7 +533,7 @@ def main():
         sys.exit(1)
 
     if args.skip_docs:
-        os.makedirs(os.path.join('qutebrowser', 'html', 'doc'), exist_ok=True)
+        (pathlib.Path('qutebrowser') / 'html' / 'doc').mkdir(exist_ok=True)
     else:
         run_asciidoc2html(args)
 

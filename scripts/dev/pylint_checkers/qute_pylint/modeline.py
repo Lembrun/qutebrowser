@@ -18,7 +18,7 @@
 
 """Checker for vim modelines in files."""
 
-import os.path
+import pathlib
 import contextlib
 
 from pylint import interfaces, checkers
@@ -39,7 +39,7 @@ class ModelineChecker(checkers.BaseChecker):
 
     def process_module(self, node):
         """Process the module."""
-        if os.path.basename(os.path.splitext(node.file)[0]) == '__init__':
+        if pathlib.Path(node.file).stem == '__init__':
             return
         max_lineno = 1
         with contextlib.closing(node.stream()) as stream:

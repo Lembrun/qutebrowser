@@ -27,10 +27,10 @@ import urllib.error
 import shutil
 import json
 import os
+import pathlib
 import sys
 
-sys.path.insert(
-    0, os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
+sys.path.insert(0, str(pathlib.Path(__file__).parent / '..' / '..'))
 from scripts import dictcli
 from qutebrowser.config import configdata
 
@@ -44,23 +44,21 @@ def download_nsis_plugins():
                  'Demos/Common/Utils.nsh')
     dll_files = ('Plugins/x86-unicode/UAC.dll',
                  'Plugins/x86-unicode/StdUtils.dll')
-    include_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                               '..', '..', 'misc', 'nsis',
-                               'include')
-    plugins_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                               '..', '..', 'misc', 'nsis',
-                               'plugins', 'x86-unicode')
-    os.makedirs(include_dir, exist_ok=True)
-    os.makedirs(plugins_dir, exist_ok=True)
+    include_dir = pathlib.Path(__file__).resolve().parent /
+    '..' / '..' / 'misc' / 'nsis' / 'include'
+    plugins_dir = pathlib.Path(__file__).resolve().parent /
+    '..' / '..' / 'misc' / 'nsis' / 'plugins' / 'x86-unicode'
+    include_dir.mkdir(exist_ok=True)
+    plugins_dir.mkdir(exist_ok=True)
     print("=> Downloading NSIS plugins")
     for nsh_file in nsh_files:
-        target_path = os.path.join(include_dir, os.path.basename(nsh_file))
+        target_path = include_dir / pathlib.Path(nsh_file).name
         urllib.request.urlretrieve('{}/{}/{}'.format(github_url, git_commit,
-                                                     nsh_file), target_path)
+                                                     nsh_file), str(target_path))
     for dll_file in dll_files:
-        target_path = os.path.join(plugins_dir, os.path.basename(dll_file))
+        target_path = plugins_dir / pathlib.Path(dll_file).name
         urllib.request.urlretrieve('{}/{}/{}'.format(github_url, git_commit,
-                                                     dll_file), target_path)
+                                                     dll_file), str(target_path))
     urllib.request.urlcleanup()
 
 
@@ -101,19 +99,18 @@ def update_pdfjs(target_version=None):
         url = ('https://github.com/mozilla/pdf.js/releases/download/'
                'v{0}/pdfjs-{0}-dist.zip').format(target_version)
 
-    os.chdir(os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                          '..', '..'))
-    target_path = os.path.join('qutebrowser', '3rdparty', 'pdfjs')
+    os.chdir(pathlib.Path(__file__).resolve().parent / '..' / '..')
+    target_path = pathlib.Path('qutebrowser') / '3rdparty' / 'pdfjs'
     print("=> Downloading pdf.js {}".format(version))
     try:
         (archive_path, _headers) = urllib.request.urlretrieve(url)
     except urllib.error.HTTPError as error:
         print("Could not retrieve pdfjs {}: {}".format(version, error))
         return
-    if os.path.isdir(target_path):
+    if target_path.is_dir():
         print("Removing old version in {}".format(target_path))
         shutil.rmtree(target_path)
-    os.makedirs(target_path)
+    target_path.mkdir(parents=True)
     print("Extracting new version")
     shutil.unpack_archive(archive_path, target_path, 'zip')
     urllib.request.urlcleanup()
@@ -126,8 +123,8 @@ def update_dmg_makefile():
     """
     print("Updating fancy-dmg Makefile...")
     url = 'https://raw.githubusercontent.com/remko/fancy-dmg/master/Makefile'
-    target_path = os.path.join('scripts', 'dev', 'Makefile-dmg')
-    urllib.request.urlretrieve(url, target_path)
+    target_path = pathlib.Path('scripts') / 'dev' / 'Makefile-dmg'
+    urllib.request.urlretrieve(url, str(target_path))
     urllib.request.urlcleanup()
 
 
@@ -138,9 +135,9 @@ def update_ace():
     """
     print("Updating ACE...")
     url = 'https://raw.githubusercontent.com/ajaxorg/ace-builds/master/src/ace.js'
-    target_path = os.path.join('tests', 'end2end', 'data', 'hints', 'ace',
-                               'ace.js')
-    urllib.request.urlretrieve(url, target_path)
+    target_path = pathlib.Path('tests') / 'end2end'
+    / 'data' / 'hints' / 'ace' / 'ace.js'
+    urllib.request.urlretrieve(url, str(target_path))
     urllib.request.urlcleanup()
 
 

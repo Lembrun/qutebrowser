@@ -21,7 +21,6 @@
 """Various small code checkers."""
 
 import os
-import os.path
 import re
 import sys
 import argparse
@@ -118,7 +117,7 @@ def check_changelog_urls(_args: argparse.Namespace = None) -> bool:
 
 def check_git(_args: argparse.Namespace = None) -> bool:
     """Check for uncommitted git files."""
-    if not os.path.isdir(".git"):
+    if not pathlib.Path(".git").is_dir():
         print("No .git dir, ignoring")
         print()
         return False

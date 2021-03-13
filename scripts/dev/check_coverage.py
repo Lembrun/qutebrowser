@@ -21,15 +21,14 @@
 """Enforce perfect coverage on some files."""
 
 import os
-import os.path
+import pathlib
 import sys
 import enum
 import subprocess
 import dataclasses
 from xml.etree import ElementTree
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), os.pardir,
-                                os.pardir))
+sys.path.insert(0, str(pathlib.Path(__file__).parent / '..' / '..'))
 
 from scripts import utils as scriptutils
 from qutebrowser.utils import utils
@@ -246,10 +245,9 @@ class Skipped(Exception):
 
 def _get_filename(filename):
     """Transform the absolute test filenames to relative ones."""
-    if os.path.isabs(filename):
-        basedir = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), '..', '..'))
-        common_path = os.path.commonprefix([basedir, filename])
+    if pathlib.Path(filename).is_absolute():
+        basedir = (pathlib.Path(__file__) / '..' / '..').resolve()
+        common_path = os.path.commonprefix([str(basedir), filename])
         if common_path:
             filename = filename[len(common_path):].lstrip('/')
 

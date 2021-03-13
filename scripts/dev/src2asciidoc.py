@@ -21,7 +21,7 @@
 """Generate asciidoc source for qutebrowser based on docstrings."""
 
 import os
-import os.path
+import pathlib
 import sys
 import shutil
 import inspect
@@ -29,8 +29,7 @@ import subprocess
 import tempfile
 import argparse
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), os.pardir,
-                                os.pardir))
+sys.path.insert(0, str(pathlib.Path(__file__) / '..' / '..'))
 
 # We import qutebrowser.app so all @cmdutils-register decorators are run.
 import qutebrowser.app

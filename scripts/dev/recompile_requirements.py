@@ -22,20 +22,18 @@
 
 import re
 import sys
-import os.path
+import pathlib
 import glob
 import subprocess
 import tempfile
 import argparse
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), os.pardir,
-                                os.pardir))
+sys.path.insert(0, str(pathlib.Path(__file__).parent / '..' / '..'))
 
 from scripts import utils
 
-REPO_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                        '..', '..')  # /scripts/dev -> /scripts -> /
-REQ_DIR = os.path.join(REPO_DIR, 'misc', 'requirements')
+REPO_DIR = pathlib.Path(__file__).resolve().parent / '..' / '..' # /scripts/dev -> /scripts -> /
+REQ_DIR = REPO_DIR / 'misc' / 'requirements'
 
 CHANGELOG_URLS = {
     'pyparsing': 'https://github.com/pyparsing/pyparsing/blob/master/CHANGES',
@@ -267,8 +265,8 @@ def read_comments(fobj):
 
 def get_all_names():
     """Get all requirement names based on filenames."""
-    for filename in glob.glob(os.path.join(REQ_DIR, 'requirements-*.txt-raw')):
-        basename = os.path.basename(filename)
+    for filename in (REQ_DIR / 'requirements-*.txt-raw').glob('*'):
+        basename = filename.name
         yield basename[len('requirements-'):-len('.txt-raw')]
 
 
@@ -282,7 +280,7 @@ def run_pip(venv_dir, *args, quiet=False, **kwargs):
     utils.print_col('venv$ pip {}'.format(arg_str), 'blue')
 
     venv_python = get_venv_python(venv_dir)
-    return subprocess.run([venv_python, '-m', 'pip'] + args, check=True, **kwargs)
+    return subprocess.run([str(venv_python), '-m', 'pip'] + args, check=True, **kwargs)
 
 
 def init_venv(host_python, venv_dir, requirements, pre=False):
@@ -469,20 +467,20 @@ def get_host_python(name):
 def get_venv_python(venv_dir):
     """Get the path to Python inside a virtualenv."""
     subdir = 'Scripts' if os.name == 'nt' else 'bin'
-    return os.path.join(venv_dir, subdir, 'python')
+    return pathlib.Path(venv_dir) / subdir / 'python'
 
 
 def get_outfile(name):
     """Get the path to the output requirements.txt file."""
     if name == 'qutebrowser':
-        return os.path.join(REPO_DIR, 'requirements.txt')
-    return os.path.join(REQ_DIR, 'requirements-{}.txt'.format(name))
+        return REPO_DIR / 'requirements.txt'
+    return REQ_DIR / 'requirements-{}.txt'.format(name)
 
 
 def build_requirements(name):
     """Build a requirements file."""
     utils.print_subtitle("Building")
-    filename = os.path.join(REQ_DIR, 'requirements-{}.txt-raw'.format(name))
+    filename = REQ_DIR / 'requirements-{}.txt-raw'.format(name)
     host_python = get_host_python(name)
 
     with open(filename, 'r', encoding='utf-8') as f:
@@ -519,14 +517,14 @@ def build_requirements(name):
 def test_tox():
     """Test requirements via tox."""
     host_python = get_host_python('tox')
-    req_path = os.path.join(REQ_DIR, 'requirements-tox.txt')
+    req_path = REQ_DIR / 'requirements-tox.txt'
 
     with tempfile.TemporaryDirectory() as tmpdir:
-        venv_dir = os.path.join(tmpdir, 'venv')
-        tox_workdir = os.path.join(tmpdir, 'tox-workdir')
+        venv_dir = pathlib.Path(tmpdir) / 'venv'
+        tox_workdir = pathlib.Path(tmpdir) / 'tox-workdir'
         venv_python = get_venv_python(venv_dir)
         init_venv(host_python, venv_dir, req_path)
-        list_proc = subprocess.run([venv_python, '-m', 'tox', '--listenvs'],
+        list_proc = subprocess.run([str(venv_python), '-m', 'tox', '--listenvs'],
                                    check=True,
                                    stdout=subprocess.PIPE,
                                    universal_newlines=True)
@@ -535,8 +533,8 @@ def test_tox():
             with utils.gha_group('tox for {}'.format(env)):
                 utils.print_subtitle(env)
                 utils.print_col('venv$ tox -e {} --notest'.format(env), 'blue')
-                subprocess.run([venv_python, '-m', 'tox',
-                                '--workdir', tox_workdir,
+                subprocess.run([str(venv_python), '-m', 'tox',
+                                '--workdir', str(tox_workdir),
                                 '-e', env,
                                 '--notest'],
                                check=True)

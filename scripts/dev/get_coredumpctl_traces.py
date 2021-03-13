@@ -21,15 +21,14 @@
 """Get qutebrowser crash information and stacktraces from coredumpctl."""
 
 import os
-import os.path
+import pathlib
 import sys
 import argparse
 import subprocess
 import tempfile
 import dataclasses
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), os.pardir,
-                                os.pardir))
+sys.path.insert(0, str(pathlib.Path(__file__).parent / '..' / '..'))
 
 from scripts import utils
 
@@ -100,7 +99,7 @@ def get_info(pid):
 
 def is_qutebrowser_dump(parsed):
     """Check if the given Line is a qutebrowser dump."""
-    basename = os.path.basename(parsed.exe)
+    basename = pathlib.Path(parsed.exe).name
     if basename == 'python' or basename.startswith('python3'):
         info = get_info(parsed.pid)
         try:
@@ -116,10 +115,10 @@ def is_qutebrowser_dump(parsed):
 def dump_infos_gdb(parsed):
     """Dump all needed infos for the given crash using gdb."""
     with tempfile.TemporaryDirectory() as tempdir:
-        coredump = os.path.join(tempdir, 'dump')
-        subprocess.run(['coredumpctl', 'dump', '-o', coredump,
+        coredump = pathlib.Path(tempdir) /  'dump'
+        subprocess.run(['coredumpctl', 'dump', '-o', str(coredump),
                         str(parsed.pid)], check=True)
-        subprocess.run(['gdb', parsed.exe, coredump,
+        subprocess.run(['gdb', parsed.exe, str(coredump),
                         '-ex', 'info threads',
                         '-ex', 'thread apply all bt full',
                         '-ex', 'quit'], check=True)

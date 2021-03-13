@@ -23,11 +23,10 @@
 
 import sys
 import argparse
-import os.path
+import pathlib
 import subprocess
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), os.pardir,
-                                os.pardir))
+sys.path.insert(0, str(pathlib.Path(__file__) / '..' / '..'))
 
 from scripts import utils
 

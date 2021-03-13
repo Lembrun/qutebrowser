@@ -20,15 +20,14 @@
 
 """Generate file_version_info.txt for Pyinstaller use with Windows builds."""
 
-import os.path
+import pathlib
 import sys
 
 # pylint: disable=import-error,no-member,useless-suppression
 from PyInstaller.utils.win32 import versioninfo as vs
 # pylint: enable=import-error,no-member,useless-suppression
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), os.pardir,
-                                os.pardir))
+sys.path.insert(0, str(pathlib.Path(__file__).parent / '..' / '..'))
 
 import qutebrowser
 from scripts import utils
