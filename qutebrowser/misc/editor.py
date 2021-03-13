@@ -20,6 +20,7 @@
 """Launcher for an external editor."""
 
 import os
+import pathlib
 import tempfile
 
 from PyQt5.QtCore import (pyqtSignal, pyqtSlot, QObject, QProcess,
@@ -171,7 +172,7 @@ class ExternalEditor(QObject):
 
     def edit_file(self, filename):
         """Edit the file with the given filename."""
-        if not os.path.exists(filename):
+        if not pathlib.Path(filename).exists():
             with open(filename, 'w', encoding='utf-8'):
                 pass
         self._filename = filename

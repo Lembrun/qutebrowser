@@ -20,6 +20,7 @@
 """Utilities for IPC with existing instances."""
 
 import os
+import pathlib
 import time
 import json
 import getpass
@@ -80,7 +81,7 @@ def _get_socketname(basedir):
 
     prefix = 'i-' if utils.is_mac else 'ipc-'
     filename = '{}{}'.format(prefix, md5)
-    return os.path.join(standarddir.runtime(), filename)
+    return str(pathlib.Path(standarddir.runtime() / filename)
 
 
 class Error(Exception):
@@ -231,7 +232,7 @@ class IPCServer(QObject):
         if not utils.is_windows:  # pragma: no cover
             # WORKAROUND for QTBUG-48635, see the comment in __init__ for details.
             try:
-                os.chmod(self._server.fullServerName(), 0o700)
+                pathlib.Path(self._server.fullServerName()).chmod(0o700)
             except FileNotFoundError:
                 # https://github.com/qutebrowser/qutebrowser/issues/1530
                 # The server doesn't actually exist even if ok was reported as
@@ -472,11 +473,11 @@ def send_to_running_instance(socketname, command, target_arg, *, socket=None):
                      'version': qutebrowser.__version__,
                      'protocol_version': PROTOCOL_VERSION}
         try:
-            cwd = os.getcwd()
+            cwd = pathlib.Path.cwd()
         except OSError:
             pass
         else:
-            json_data['cwd'] = cwd
+            json_data['cwd'] = str(cwd)
         line = json.dumps(json_data) + '\n'
         data = line.encode('utf-8')
         log.ipc.debug("Writing: {!r}".format(data))

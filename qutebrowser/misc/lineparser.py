@@ -20,7 +20,7 @@
 """Parser for line-based files like histories."""
 
 import os
-import os.path
+import pathlib
 import contextlib
 from typing import Sequence
 
@@ -57,7 +57,7 @@ class BaseLineParser(QObject):
         """
         super().__init__(parent)
         self._configdir = configdir
-        self._configfile = os.path.join(self._configdir, fname)
+        self._configfile = pathlib.Path(self._configdir) / fname
         self._fname = fname
         self._binary = binary
         self._opened = False
@@ -73,7 +73,7 @@ class BaseLineParser(QObject):
         Return:
             True if the file should be saved, False otherwise.
         """
-        os.makedirs(self._configdir, 0o755, exist_ok=True)
+        pathlib.Path(self._configdir).mkdir(mode=0o755, exist_ok=True)
         return True
 
     def _after_save(self):
@@ -149,7 +149,7 @@ class LineParser(BaseLineParser):
             binary: Whether to open the file in binary mode.
         """
         super().__init__(configdir, fname, binary=binary, parent=parent)
-        if not os.path.isfile(self._configfile):
+        if not self._configfile.is_file():
             self.data: Sequence[str] = []
         else:
             log.init.debug("Reading {}".format(self._configfile))
@@ -225,7 +225,7 @@ class LimitLineParser(LineParser):
             return
         value = config.instance.get(option)
         if value == 0:
-            if os.path.exists(self._configfile):
+            if self._configfile.exists():
                 os.remove(self._configfile)
 
     def save(self):

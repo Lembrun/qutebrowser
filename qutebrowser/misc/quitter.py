@@ -20,7 +20,7 @@
 """Helpers related to quitting qutebrowser cleanly."""
 
 import os
-import os.path
+import pathlib
 import sys
 import json
 import atexit
@@ -78,21 +78,21 @@ class Quitter(QObject):
 
     def _compile_modules(self) -> None:
         """Compile all modules to catch SyntaxErrors."""
-        if os.path.basename(sys.argv[0]) == 'qutebrowser':
+        if pathlib.Path(sys.argv[0]).name == 'qutebrowser':
             # Launched via launcher script
             return
         elif hasattr(sys, 'frozen'):
             return
         else:
-            path = os.path.abspath(os.path.dirname(qutebrowser.__file__))
-            if not os.path.isdir(path):
+            path = pathlib.Path(qutebrowser.__file__).parent.resolve()
+            if not path.is_dir():
                 # Probably running from a python egg.
                 return
 
         for dirpath, _dirnames, filenames in os.walk(path):
             for fn in filenames:
-                if os.path.splitext(fn)[1] == '.py' and os.path.isfile(fn):
-                    with tokenize.open(os.path.join(dirpath, fn)) as f:
+                if pathlib.Path(fn).suffix == '.py' and pathlib.Path(fn).is_file():
+                    with tokenize.open(pathlib.Path(dirpath) / fn)) as f:
                         compile(f.read(), fn, 'exec')
 
     def _get_restart_args(
@@ -110,7 +110,7 @@ class Quitter(QObject):
         Return:
             The commandline as a list of strings.
         """
-        if os.path.basename(sys.argv[0]) == 'qutebrowser':
+        if pathlib.Path(sys.argv[0]).suffix == 'qutebrowser':
             # Launched via launcher script
             args = [sys.argv[0]]
         elif hasattr(sys, 'frozen'):

@@ -20,6 +20,7 @@
 """Dialogs shown when there was a problem with a backend choice."""
 
 import os
+import pathlib
 import sys
 import functools
 import html
@@ -387,8 +388,8 @@ class _BackendProblemChecker:
             return
 
         log.init.info("Qt version changed, nuking QtWebEngine cache")
-        cache_dir = os.path.join(standarddir.cache(), 'webengine')
-        if os.path.exists(cache_dir):
+        cache_dir = pathlib.Path(standarddir.cache() / 'webengine'
+        if cache_dir.exists():
             shutil.rmtree(cache_dir)
 
     def _handle_serviceworker_nuking(self) -> None:
@@ -411,10 +412,10 @@ class _BackendProblemChecker:
         else:
             return
 
-        service_worker_dir = os.path.join(
-            standarddir.data(), 'webengine', 'Service Worker')
-        bak_dir = service_worker_dir + '-bak'
-        if not os.path.exists(service_worker_dir):
+        service_worker_dir = pathlib.Path(
+            standarddir.data()) / 'webengine' / 'Service Worker'
+        bak_dir = pathlib.Path(service_worker_dir + '-bak')
+        if not service_worker_dir.exists():
             return
 
         log.init.info(
@@ -422,7 +423,7 @@ class _BackendProblemChecker:
 
         # Keep one backup around - we're not 100% sure what persistent data
         # could be in there, but this folder can grow to ~300 MB.
-        if os.path.exists(bak_dir):
+        if bak_dir.exists():
             shutil.rmtree(bak_dir)
 
         shutil.move(service_worker_dir, bak_dir)

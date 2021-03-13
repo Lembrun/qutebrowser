@@ -20,7 +20,7 @@
 """Handlers for crashes and OS signals."""
 
 import os
-import os.path
+import pathlib
 import sys
 import bdb
 import pdb  # noqa: T002
@@ -88,12 +88,11 @@ class CrashHandler(QObject):
 
     def init_faulthandler(self):
         """Handle a segfault from a previous run and set up faulthandler."""
-        logname = os.path.join(standarddir.data(), 'crash.log')
+        logname = pathlib.Path(standarddir.data()) / 'crash.log'
         try:
             # First check if an old logfile exists.
-            if os.path.exists(logname):
-                with open(logname, 'r', encoding='ascii') as f:
-                    self._crash_log_data = f.read()
+            if logname.exists():
+                self._crash_log_data = logname.read_text(encoding='ascii')
                 os.remove(logname)
                 self._init_crashlogfile()
             else:
@@ -148,9 +147,9 @@ class CrashHandler(QObject):
 
     def _init_crashlogfile(self):
         """Start a new logfile and redirect faulthandler to it."""
-        logname = os.path.join(standarddir.data(), 'crash.log')
+        logname = pathlib.Path(standarddir.data()) / 'crash.log'
         try:
-            self._crash_log_file = open(logname, 'w', encoding='ascii')
+            self._crash_log_file = logname.write_text(encoding='ascii')
         except OSError:
             log.init.exception("Error while opening crash log file!")
         else:

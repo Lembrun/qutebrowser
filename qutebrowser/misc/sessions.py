@@ -20,7 +20,7 @@
 """Management of sessions - saved tabs/windows."""
 
 import os
-import os.path
+import pathlib
 import itertools
 import urllib
 import shutil
@@ -168,15 +168,15 @@ class SessionManager(QObject):
             check_exists: Whether it should also be checked if the session
                           exists.
         """
-        path = os.path.expanduser(name)
-        if os.path.isabs(path) and ((not check_exists) or
-                                    os.path.exists(path)):
-            return path
+        path = pathlib.Path(name).expanduser()
+        if path.is_absolute() and ((not check_exists) or
+                                    (path).exists()):
+            return str(path)
         else:
-            path = os.path.join(self._base_path, name + '.yml')
-            if check_exists and not os.path.exists(path):
+            path = (pathlib.Path(self._base_path) / name).with_suffix('.yml')
+            if check_exists and not path.exists():
                 raise SessionNotFoundError(path)
-            return path
+            return str(path)
 
     def exists(self, name):
         """Check if a named session exists."""
@@ -520,8 +520,8 @@ class SessionManager(QObject):
     def list_sessions(self):
         """Get a list of all session names."""
         sessions = []
-        for filename in os.listdir(self._base_path):
-            base, ext = os.path.splitext(filename)
+        for filename in pathlib.Path(self._base_path).iterdir():
+            base, ext = pathlib.Path(filename).suffix
             if ext == '.yml':
                 sessions.append(base)
         return sorted(sessions)

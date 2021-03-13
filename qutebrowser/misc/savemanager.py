@@ -19,7 +19,7 @@
 
 """Saving things to disk periodically."""
 
-import os.path
+import pathlib
 import collections
 from typing import MutableMapping
 
@@ -57,7 +57,7 @@ class Saveable:
         else:
             self._save_on_exit = True
         self._filename = filename
-        if filename is not None and not os.path.exists(filename):
+        if filename is not None and not pathlib.Path(filename).exists():
             self._dirty = True
             self.save()
 

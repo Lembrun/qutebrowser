@@ -22,7 +22,7 @@
 # QApplication and objects are imported so they're usable in :debug-pyeval
 
 import functools
-import os
+import pathlib
 import traceback
 from typing import Optional
 
@@ -156,10 +156,9 @@ def debug_pyeval(s: str, file: bool = False, quiet: bool = False) -> None:
     """
     if file:
         quiet = True
-        path = os.path.expanduser(s)
+        path = pathlib.Path(s).expanduser()
         try:
-            with open(path, 'r', encoding='utf-8') as f:
-                s = f.read()
+            path.read_text(encoding='utf-8')
         except OSError as e:
             raise cmdutils.CommandError(str(e))
         try:
