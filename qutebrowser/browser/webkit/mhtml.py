@@ -23,7 +23,7 @@
 import html
 import functools
 import io
-import os
+import pathlib
 import re
 import sys
 import uuid
@@ -516,7 +516,7 @@ def start_download_checked(target, tab):
     default_name = utils.force_encoding(default_name, encoding)
     dest = utils.force_encoding(target.filename, encoding)
 
-    dest = os.path.expanduser(dest)
+    dest = pathlib.Path(dest).expanduser()
 
     # See if we already have an absolute path
     path = downloads.create_full_filename(default_name, dest)
@@ -524,19 +524,19 @@ def start_download_checked(target, tab):
         # We still only have a relative path, prepend download_dir and
         # try again.
         path = downloads.create_full_filename(
-            default_name, os.path.join(downloads.download_dir(), dest))
-    downloads.last_used_directory = os.path.dirname(path)
+            default_name, str(pathlib.Path(downloads.download_dir()) / dest))
+    downloads.last_used_directory = pathlib.Path(path).parent
 
     # Avoid downloading files if we can't save the output anyway...
     # Yes, this is prone to race conditions, but we're checking again before
     # saving the file anyway.
-    if not os.path.isdir(os.path.dirname(path)):
-        folder = os.path.dirname(path)
+    if not pathlib.Path(path).parent.is_dir():
+        folder = pathlib.Path(path).parent
         message.error("Directory {} does not exist.".format(folder))
         return
 
     target = downloads.FileDownloadTarget(path)
-    if not os.path.isfile(path):
+    if not pathlib.Path(path).is_file():
         _start_download(target, tab=tab)
         return
 

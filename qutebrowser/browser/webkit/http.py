@@ -22,7 +22,7 @@
 import email.headerregistry
 import email.errors
 import dataclasses
-import os.path
+import pathlib
 from typing import Type
 
 from PyQt5.QtNetwork import QNetworkRequest
@@ -148,7 +148,7 @@ def parse_content_disposition(reply):
     # attribute.
     if reply.hasRawHeader(content_disposition_header):
         # We use the unsafe variant of the filename as we sanitize it via
-        # os.path.basename later.
+        # pathlib.Path.name later.
         try:
             value = bytes(reply.rawHeader(content_disposition_header))
             log.network.debug("Parsing Content-Disposition: {value!r}")
@@ -164,7 +164,7 @@ def parse_content_disposition(reply):
     # If that fails as well, use a fallback
     if not filename:
         filename = 'qutebrowser-download'
-    return is_inline, os.path.basename(filename)
+    return is_inline, pathlib.Path(filename).name
 
 
 def parse_content_type(reply):

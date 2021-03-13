@@ -25,7 +25,7 @@ Module attributes:
 """
 
 from typing import cast
-import os.path
+import pathlib
 
 from PyQt5.QtCore import QUrl
 from PyQt5.QtGui import QFont
@@ -179,11 +179,11 @@ def init():
 
     QWebSettings.setIconDatabasePath(standarddir.cache())
     QWebSettings.setOfflineWebApplicationCachePath(
-        os.path.join(cache_path, 'application-cache'))
+        str(pathlib.Path(cache_path / 'application-cache')))
     QWebSettings.globalSettings().setLocalStoragePath(
-        os.path.join(data_path, 'local-storage'))
+        str(pathlib.Path(data_path / 'local-storage')))
     QWebSettings.setOfflineStoragePath(
-        os.path.join(data_path, 'offline-storage'))
+        str(pathlib.Path(data_path / 'offline-storage')))
 
     settings = QWebSettings.globalSettings()
     _set_user_stylesheet(settings)

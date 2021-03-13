@@ -23,7 +23,7 @@
 
 """Handler functions for file:... pages."""
 
-import os
+import pathlib
 
 from qutebrowser.browser.webkit.network import networkreply
 from qutebrowser.utils import jinja
@@ -42,9 +42,9 @@ def get_file_list(basedir, all_files, filterfunc):
     """
     items = []
     for filename in all_files:
-        absname = os.path.join(basedir, filename)
+        absname = pathlib.Path(basedir) / filename
         if filterfunc(absname):
-            items.append({'name': filename, 'absname': absname})
+            items.append({'name': filename.name, 'absname': str(absname)})
     return sorted(items, key=lambda v: v['name'].lower())
 
 
@@ -65,7 +65,7 @@ def is_root(directory):
     # basically, for files (no trailing slash) it removes the file part, and
     # for directories, it removes the trailing slash, so the only way for this
     # to be equal is if the directory is the root directory.
-    return os.path.dirname(directory) == directory
+    return str(pathlib.Path(directory)) == directory
 
 
 def parent_dir(directory):
@@ -77,7 +77,7 @@ def parent_dir(directory):
     Return:
         The path to the parent directory.
     """
-    return os.path.normpath(os.path.join(directory, os.pardir))
+    return str(pathlib.Path(directory) / '..')
 
 
 def dirbrowser_html(path):
@@ -97,16 +97,16 @@ def dirbrowser_html(path):
         parent = parent_dir(path)
 
     try:
-        all_files = os.listdir(path)
+        all_files = list(pathlib.Path(path).iterdir())
     except OSError as e:
         html = jinja.render('error.html',
                             title="Error while reading directory",
                             url='file:///{}'.format(path), error=str(e))
         return html.encode('UTF-8', errors='xmlcharrefreplace')
 
-    files = get_file_list(path, all_files, os.path.isfile)
-    directories = get_file_list(path, all_files, os.path.isdir)
-    html = jinja.render('dirbrowser.html', title=title, url=path,
+    files = get_file_list(path, all_files, pathlib.Path.is_file())
+    directories = get_file_list(path, all_files, pathlib.Path.is_dir())
+    html = jinja.render('dirbrowser.html', title=title, url=str(path),
                         parent=parent, files=files, directories=directories)
     return html.encode('UTF-8', errors='xmlcharrefreplace')
 
@@ -122,9 +122,9 @@ def handler(request, _operation, _current_url):
     Return:
         A QNetworkReply for directories, None for files.
     """
-    path = request.url().toLocalFile()
+    path = pathlib.Path(request.url().toLocalFile())
     try:
-        if os.path.isdir(path):
+        if path.is_dir():
             data = dirbrowser_html(path)
             return networkreply.FixedDataNetworkReply(
                 request, data, 'text/html')

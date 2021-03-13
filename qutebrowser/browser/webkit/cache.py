@@ -20,7 +20,7 @@
 """HTTP network cache."""
 
 from typing import cast
-import os.path
+import pathlib
 
 from PyQt5.QtNetwork import QNetworkDiskCache
 
@@ -37,7 +37,7 @@ class DiskCache(QNetworkDiskCache):
 
     def __init__(self, cache_dir, parent=None):
         super().__init__(parent)
-        self.setCacheDirectory(os.path.join(cache_dir, 'http'))
+        self.setCacheDirectory(str(pathlib.Path(cache_dir) / 'http'))
         self._set_cache_size()
         config.instance.changed.connect(self._set_cache_size)
 
