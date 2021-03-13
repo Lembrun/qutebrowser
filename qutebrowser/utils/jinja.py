@@ -19,8 +19,7 @@
 
 """Utilities related to jinja2."""
 
-import os
-import os.path
+import pathlib
 import posixpath
 import functools
 import contextlib
@@ -70,9 +69,9 @@ class Loader(jinja2.BaseLoader):
             _env: jinja2.Environment,
             template: str
     ) -> Tuple[str, str, Callable[[], bool]]:
-        path = os.path.join(self._subdir, template)
+        path = pathlib.Path(self._subdir) / template
         try:
-            source = resources.read_file(path)
+            source = resources.read_file(str(path))
         except OSError as e:
             source = html_fallback.replace("%ERROR%", html.escape(str(e)))
             source = source.replace("%FILE%", html.escape(template))
@@ -80,7 +79,7 @@ class Loader(jinja2.BaseLoader):
                                .format(template, path))
         # Currently we don't implement auto-reloading, so we always return True
         # for up-to-date.
-        return source, path, lambda: True
+        return source, str(path), lambda: True
 
 
 class Environment(jinja2.Environment):

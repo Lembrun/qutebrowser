@@ -22,7 +22,8 @@
 import re
 import sys
 import glob
-import os.path
+import os
+import pathlib
 import platform
 import subprocess
 import importlib
@@ -208,8 +209,8 @@ def _git_str() -> Optional[str]:
     commit = None
     if not hasattr(sys, "frozen"):
         try:
-            gitpath = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                   os.path.pardir, os.path.pardir)
+            gitpath = pathlib.Path(__file__).resolve().parent
+            / '..' / '..'
         except (NameError, OSError):
             log.misc.exception("Error while getting git path")
         else:
@@ -240,7 +241,7 @@ def _git_str_subprocess(gitpath: str) -> Optional[str]:
     Return:
         The ID/timestamp on success, None on failure.
     """
-    if not os.path.isdir(os.path.join(gitpath, ".git")):
+    if not pathlib.Path(gitpath).with_suffix(".git").is_dir():
         return None
     try:
         # https://stackoverflow.com/questions/21017300/21017394#21017394
@@ -773,7 +774,7 @@ def version_info() -> str:
         lines.append('Platform plugin: {}'.format(objects.qapp.platformName()))
         lines.append('OpenGL: {}'.format(opengl_info()))
 
-    importpath = os.path.dirname(os.path.abspath(qutebrowser.__file__))
+    importpath = pathlib.Path(qutebrowser.__file__).resolve().parent
 
     lines += [
         'Platform: {}, {}'.format(platform.platform(),

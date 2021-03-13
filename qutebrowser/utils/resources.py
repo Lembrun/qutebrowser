@@ -19,7 +19,6 @@
 
 """Resources related utilities."""
 
-import os.path
 import sys
 import contextlib
 import posixpath
@@ -39,7 +38,7 @@ _cache = {}
 def _path(filename: str) -> pathlib.Path:
     """Get a pathlib.Path object for a resource."""
     assert not posixpath.isabs(filename), filename
-    assert os.path.pardir not in filename.split(posixpath.sep), filename
+    assert '..' not in filename.split(posixpath.sep), filename
 
     if hasattr(sys, 'frozen'):
         # For PyInstaller, where we can't store resource files in a qutebrowser/ folder

@@ -21,7 +21,7 @@
 
 import re
 import base64
-import os.path
+import pathlib
 import ipaddress
 import posixpath
 import urllib.parse
@@ -364,15 +364,15 @@ def get_path_if_valid(pathstr: str,
     """
     pathstr = pathstr.strip()
     log.url.debug("Checking if {!r} is a path".format(pathstr))
-    expanded = os.path.expanduser(pathstr)
+    expanded = pathlib.Path(pathstr).expanduser()
 
-    if os.path.isabs(expanded):
-        path: Optional[str] = expanded
+    if expanded.is_absolute():
+        path: Optional[str] = str(expanded)
     elif relative and cwd:
-        path = os.path.join(cwd, expanded)
+        path = str(pathlib.Path(cwd) / expanded)
     elif relative:
         try:
-            path = os.path.abspath(expanded)
+            path = str(expanded.resolve())
         except OSError:
             path = None
     else:
@@ -381,7 +381,7 @@ def get_path_if_valid(pathstr: str,
     if check_exists:
         if path is not None:
             try:
-                if os.path.exists(path):
+                if pathlib.Path(path).exists():
                     log.url.debug("URL is a local file")
                 else:
                     path = None

@@ -20,7 +20,7 @@
 """Other utilities which don't fit anywhere else."""
 
 import os
-import os.path
+import pathlib
 import io
 import re
 import sys
@@ -503,7 +503,7 @@ def sanitize_filename(name: str,
     # We also want to keep some space for QtWebEngine's ".download" suffix, as
     # well as deduplication counters.
     max_bytes = 255 - len("(123).download")
-    root, ext = os.path.splitext(name)
+    root, ext = pathlib.Path(name).suffix
     root = root[:max_bytes - len(ext)]
     excess = len(os.fsencode(root + ext)) - max_bytes
 

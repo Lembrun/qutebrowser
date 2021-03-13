@@ -22,7 +22,7 @@
 import re
 import sys
 import inspect
-import os.path
+import pathlib
 import collections
 import enum
 from typing import Callable, MutableMapping, Optional, List, Union
@@ -33,8 +33,8 @@ from qutebrowser.utils import log, utils
 
 def is_git_repo() -> bool:
     """Check if we're running from a git repository."""
-    gitfolder = os.path.join(qutebrowser.basedir, os.path.pardir, '.git')
-    return os.path.isdir(gitfolder)
+    gitfolder = pathlib.Path(qutebrowser.basedir) / '..' / '.git'
+    return gitfolder.exists()
 
 
 def docs_up_to_date(path: str) -> bool:
@@ -49,13 +49,13 @@ def docs_up_to_date(path: str) -> bool:
     """
     if hasattr(sys, 'frozen') or not is_git_repo():
         return True
-    html_path = os.path.join(qutebrowser.basedir, 'html', 'doc', path)
-    filename = os.path.splitext(path)[0]
-    asciidoc_path = os.path.join(qutebrowser.basedir, os.path.pardir,
-                                 'doc', 'help', filename + '.asciidoc')
+    html_path = pathlib.Path(qutebrowser.basedir / 'html' / 'doc' / path
+    filename = pathlib.Path(path).suffix
+    asciidoc_path = (pathlib.Path(qutebrowser.basedir) / '..' /
+                     'doc' / 'help' / filename).with_suffix('.asciidoc')
     try:
-        html_time = os.path.getmtime(html_path)
-        asciidoc_time = os.path.getmtime(asciidoc_path)
+        html_time = html_path.stat().st_mtime
+        asciidoc_time = asciidoc_path.stat().st_mtime
     except FileNotFoundError:
         return True
     return asciidoc_time <= html_time
