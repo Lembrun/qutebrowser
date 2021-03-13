@@ -20,7 +20,7 @@
 """Functions to execute a userscript."""
 
 import os
-import os.path
+import pathlib
 import tempfile
 from typing import cast, Any, MutableMapping, Tuple
 
@@ -394,13 +394,13 @@ def _lookup_path(cmd):
         A path to the userscript.
     """
     directories = [
-        os.path.join(standarddir.data(), "userscripts"),
-        os.path.join(standarddir.data(system=True), "userscripts"),
-        os.path.join(standarddir.config(), "userscripts"),
+        pathlib.Path(standarddir.data()) / "userscripts",
+        pathlib.Path(standarddir.data(system=True)), "userscripts",
+        pathlib.Path(standarddir.config()) / "userscripts",
     ]
     for directory in directories:
-        cmd_path = os.path.join(directory, cmd)
-        if os.path.exists(cmd_path):
+        cmd_path = directory / cmd
+        if cmd_path.exists():
             return cmd_path
 
     raise NotFoundError(cmd, directories)
@@ -447,14 +447,14 @@ def run_async(tab, cmd, *args, win_id, env, verbose=False,
                                               window=win_id).text()
     env['QUTE_VERSION'] = qutebrowser.__version__
 
-    cmd_path = os.path.expanduser(cmd)
+    cmd_path = pathlib.Path.home() / cmd
 
     # if cmd is not given as an absolute path, look it up
     # ~/.local/share/qutebrowser/userscripts (or $XDG_DATA_HOME)
-    if not os.path.isabs(cmd_path):
+    if not cmd_path.is_absolute():
         log.misc.debug("{} is no absolute path".format(cmd_path))
         cmd_path = _lookup_path(cmd)
-    elif not os.path.exists(cmd_path):
+    elif not cmd_path.exists():
         raise NotFoundError(cmd_path)
     log.misc.debug("Userscript to run: {}".format(cmd_path))
 
