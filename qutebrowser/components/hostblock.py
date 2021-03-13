@@ -24,7 +24,6 @@ import pathlib
 import posixpath
 import zipfile
 import logging
-import pathlib
 from typing import cast, IO, Set
 
 from PyQt5.QtCore import QUrl

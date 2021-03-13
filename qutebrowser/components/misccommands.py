@@ -24,7 +24,7 @@ import signal
 import functools
 import logging
 import pathlib
-from typing import Optional
+from typing import Optional, Union
 
 try:
     import hunter
@@ -88,7 +88,7 @@ def _print_preview(tab: apitypes.Tab) -> None:
     diag.exec()
 
 
-def _print_pdf(tab: apitypes.Tab, filename: str) -> None:
+def _print_pdf(tab: apitypes.Tab, filename: Union[str, pathlib.Path]) -> None:
     """Print to the given PDF file."""
     tab.printing.check_pdf_support()
     filename = pathlib.Path(filename).expanduser()
@@ -138,7 +138,7 @@ def home(tab: apitypes.Tab) -> None:
 
 @cmdutils.register(debug=True)
 @cmdutils.argument('tab', value=cmdutils.Value.cur_tab)
-def debug_dump_page(tab: apitypes.Tab, dest: str, plain: bool = False) -> None:
+def debug_dump_page(tab: apitypes.Tab, dest: pathlib.Path, plain: bool = False) -> None:
     """Dump the current page's content to a file.
 
     Args:
@@ -150,7 +150,7 @@ def debug_dump_page(tab: apitypes.Tab, dest: str, plain: bool = False) -> None:
     def callback(data: str) -> None:
         """Write the data to disk."""
         try:
-            dest.write_text(data,encoding='utf-8')
+            dest.write_text(data, encoding='utf-8')
         except OSError as e:
             message.error('Could not write page: {}'.format(e))
         else:

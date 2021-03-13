@@ -111,7 +111,7 @@ class BlocklistDownloads(QObject):
                     if entry.is_file():
                         self._import_local(entry.path)
             else:
-                self._import_local(filename)
+                self._import_local(str(filename))
         else:
             download = downloads.download_temp(url)
             self._in_progress.append(download)
