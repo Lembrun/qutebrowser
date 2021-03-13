@@ -19,7 +19,8 @@
 
 """Showing prompts above the statusbar."""
 
-import os.path
+import os
+import pathlib
 import html
 import collections
 import functools
@@ -637,24 +638,24 @@ class FilenamePrompt(_BasePrompt):
         if os.altsep is not None:
             separators += os.altsep
 
-        dirname = os.path.dirname(path)
-        basename = os.path.basename(path)
+        dirname = pathlib.Path(path).parent
+        basename = pathlib.Path(path).name
         if not tabbed:
             self._to_complete = ''
 
         try:
             if not path:
                 pass
-            elif path in separators and os.path.isdir(path):
+            elif path in separators and pathlib.Path(path).is_dir():
                 # Input "/" -> don't strip anything
                 pass
-            elif path[-1] in separators and os.path.isdir(path):
+            elif path[-1] in separators and pathlib.Path(path).is_dir():
                 # Input like /foo/bar/ -> show /foo/bar/ contents
                 path = path.rstrip(separators)
-            elif os.path.isdir(dirname) and not tabbed:
+            elif dirname.is_dir() and not tabbed:
                 # Input like /foo/ba -> show /foo contents
-                path = dirname
-                self._to_complete = basename
+                path = str(dirname)
+                self._to_complete = str(basename)
             else:
                 return
         except OSError:
@@ -673,9 +674,9 @@ class FilenamePrompt(_BasePrompt):
             clicked: Whether the element was clicked.
         """
         if index == QModelIndex():
-            path = os.path.join(self._file_model.rootPath(), self._to_complete)
+            path = pathlib.Path(self._file_model.rootPath()) / self._to_complete
         else:
-            path = os.path.normpath(self._file_model.filePath(index))
+            path = pathlib.Path(self._file_model.filePath(index))
 
         if clicked:
             path += os.sep
