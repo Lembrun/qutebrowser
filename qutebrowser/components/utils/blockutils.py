@@ -21,6 +21,7 @@
 """Code that is shared between the host blocker and Brave ad blocker."""
 
 import os
+import pathlib
 import functools
 from typing import IO, List, Optional
 
@@ -104,8 +105,8 @@ class BlocklistDownloads(QObject):
         if url.scheme() == "file":
             # The URL describes a local file on disk if the url scheme is
             # "file://". We handle those as a special case.
-            filename = url.toLocalFile()
-            if os.path.isdir(filename):
+            filename = pathlib.Path(url.toLocalFile())
+            if filename.is_dir():
                 for entry in os.scandir(filename):
                     if entry.is_file():
                         self._import_local(entry.path)

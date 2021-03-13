@@ -19,7 +19,8 @@
 
 """Functions related to host blocking."""
 
-import os.path
+import os
+import pathlib
 import posixpath
 import zipfile
 import logging
@@ -185,7 +186,7 @@ class HostBlocker:
         Return:
             True if a read was attempted, False otherwise
         """
-        if not os.path.exists(filename):
+        if not pathlib.Path(filename).exists():
             return False
 
         try:

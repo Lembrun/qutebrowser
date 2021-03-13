@@ -91,11 +91,11 @@ def _print_preview(tab: apitypes.Tab) -> None:
 def _print_pdf(tab: apitypes.Tab, filename: str) -> None:
     """Print to the given PDF file."""
     tab.printing.check_pdf_support()
-    filename = os.path.expanduser(filename)
-    directory = os.path.dirname(filename)
-    if directory and not os.path.exists(directory):
-        os.mkdir(directory)
-    tab.printing.to_pdf(filename)
+    filename = pathlib.Path(filename).expanduser()
+    directory = filename.parent
+    if directory and not directory.exists():
+        directory.mkdir()
+    tab.printing.to_pdf(str(filename))
     _LOGGER.debug("Print to file: {}".format(filename))
 
 
@@ -145,13 +145,12 @@ def debug_dump_page(tab: apitypes.Tab, dest: str, plain: bool = False) -> None:
         dest: Where to write the file to.
         plain: Write plain text instead of HTML.
     """
-    dest = os.path.expanduser(dest)
+    dest = pathlib.Path(dest).expanduser()
 
     def callback(data: str) -> None:
         """Write the data to disk."""
         try:
-            with open(dest, 'w', encoding='utf-8') as f:
-                f.write(data)
+            dest.write_text(data,encoding='utf-8')
         except OSError as e:
             message.error('Could not write page: {}'.format(e))
         else:
