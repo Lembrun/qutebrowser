@@ -20,7 +20,7 @@
 """Initialization of the configuration."""
 
 import argparse
-import os.path
+import pathlib
 import sys
 
 from PyQt5.QtWidgets import QMessageBox
@@ -61,7 +61,7 @@ def early_init(args: argparse.Namespace) -> None:
     global _init_errors
 
     try:
-        if os.path.exists(config_file):
+        if pathlib.Path(config_file).exists():
             configfiles.read_config_py(config_file, warn_autoconfig=True)
         else:
             configfiles.read_autoconfig()

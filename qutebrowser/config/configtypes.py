@@ -45,7 +45,8 @@ Config types can do different conversations:
 import re
 import html
 import codecs
-import os.path
+import os
+import pathlib
 import itertools
 import functools
 import operator
@@ -1492,13 +1493,13 @@ class File(BaseType):
         elif not value:
             return None
 
-        value = os.path.expanduser(value)
+        value = pathlib.Path(value).expanduser()
         value = os.path.expandvars(value)
         try:
-            if not os.path.isabs(value):
-                value = os.path.join(standarddir.config(), value)
+            if not pathlib.Path(value).is_absolute():
+                value = pathlib.Path(standarddir.config()) / value
 
-            if self.required and not os.path.isfile(value):
+            if self.required and not pathlib.Path(value).is_file():
                 raise configexc.ValidationError(
                     value,
                     "Must be an existing file (absolute or relative to the "
@@ -1524,12 +1525,12 @@ class Directory(BaseType):
         elif not value:
             return None
         value = os.path.expandvars(value)
-        value = os.path.expanduser(value)
+        value = pathlib.Path(value).expanduser()
         try:
-            if not os.path.isdir(value):
+            if not pathlib.Path(value).is_dir():
                 raise configexc.ValidationError(
                     value, "must be a valid directory!")
-            if not os.path.isabs(value):
+            if not pathlib.Path(value).is_absolute():
                 raise configexc.ValidationError(
                     value, "must be an absolute path!")
         except UnicodeEncodeError as e:

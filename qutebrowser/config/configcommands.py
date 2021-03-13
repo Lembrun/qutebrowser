@@ -19,7 +19,7 @@
 
 """Commands related to the configuration."""
 
-import os.path
+import pathlib
 import contextlib
 from typing import TYPE_CHECKING, Iterator, List, Optional
 
@@ -397,17 +397,17 @@ class ConfigCommands:
             clear: Clear current settings first.
         """
         if filename is None:
-            filename = standarddir.config_py()
+            filename = pathlib.Path(standarddir.config_py())
         else:
-            filename = os.path.expanduser(filename)
-            if not os.path.isabs(filename):
-                filename = os.path.join(standarddir.config(), filename)
+            filename = pathlib.Path(filename).expanduser()
+            if not filename.is_absolute():
+                filename = pathlib.Path(standarddir.config() / filename
 
         if clear:
             self.config_clear()
 
         try:
-            configfiles.read_config_py(filename)
+            configfiles.read_config_py(str(filename))
         except configexc.ConfigFileErrors as e:
             raise cmdutils.CommandError(e)
 
@@ -446,13 +446,13 @@ class ConfigCommands:
             defaults: Write the defaults instead of values configured via :set.
         """
         if filename is None:
-            filename = standarddir.config_py()
+            filename = pathlib.Path(standarddir.config_py())
         else:
-            filename = os.path.expanduser(filename)
-            if not os.path.isabs(filename):
-                filename = os.path.join(standarddir.config(), filename)
+            filename = pathlib.Path(filename).expanduser()
+            if not filename.is_absolute():
+                filename = pathlib.Path(standarddir.config()) / filename
 
-        if os.path.exists(filename) and not force:
+        if filename.exists() and not force:
             raise cmdutils.CommandError("{} already exists - use --force to "
                                         "overwrite!".format(filename))
 
@@ -472,6 +472,6 @@ class ConfigCommands:
         writer = configfiles.ConfigPyWriter(options, bindings,
                                             commented=commented)
         try:
-            writer.write(filename)
+            writer.write(str(filename))
         except OSError as e:
             raise cmdutils.CommandError(str(e))

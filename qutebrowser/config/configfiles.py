@@ -22,7 +22,6 @@
 import enum
 import pathlib
 import types
-import os.path
 import sys
 import textwrap
 import traceback
@@ -85,8 +84,8 @@ class StateConfig(configparser.ConfigParser):
 
     def __init__(self) -> None:
         super().__init__()
-        self._filename = os.path.join(standarddir.data(), 'state')
-        self.read(self._filename, encoding='utf-8')
+        self._filename = pathlib.Path(standarddir.data()) / 'state'
+        self._filename.read_text(encoding='utf-8')
 
         self.qt_version_changed = False
         self.qutebrowser_version_changed = VersionChange.unknown
@@ -175,8 +174,8 @@ class YamlConfig(QObject):
 
     def __init__(self, parent: QObject = None) -> None:
         super().__init__(parent)
-        self._filename = os.path.join(standarddir.config(auto=True),
-                                      'autoconfig.yml')
+        self._filename = pathlib.Path(standarddir.config(auto=True))
+        / 'autoconfig.yml'
         self._dirty = False
 
         self._values: Dict[str, configutils.Values] = {}
@@ -683,13 +682,13 @@ class ConfigAPI:
 
     def source(self, filename: str) -> None:
         """Read the given config file from disk."""
-        if not os.path.isabs(filename):
+        if not pathlib.Path(filename).is_absolute():
             # We don't use self.configdir here so we get the proper file when starting
             # with a --config-py argument given.
-            filename = os.path.join(os.path.dirname(standarddir.config_py()), filename)
+            filename = (pathlib.Path(standarddir.config_py()) / filename).parent
 
         try:
-            read_config_py(filename)
+            read_config_py(str(filename))
         except configexc.ConfigFileErrors as e:
             self.errors += e.errors
 
@@ -850,7 +849,7 @@ def read_config_py(
         warn_autoconfig=warn_autoconfig,
     )
     container = config.ConfigContainer(config.instance, configapi=api)
-    basename = os.path.basename(filename)
+    basename = pathlib.Path((filename)).name
 
     module = types.ModuleType('config')
     module.config = api  # type: ignore[attr-defined]
@@ -881,7 +880,7 @@ def read_config_py(
         with saved_sys_properties():
             # Add config directory to python path, so config.py can import
             # other files in logical places
-            config_dir = os.path.dirname(filename)
+            config_dir = str(pathlib.Path(filename).parent)
             if config_dir not in sys.path:
                 sys.path.insert(0, config_dir)
 
@@ -943,6 +942,6 @@ def init() -> None:
     # This fixes one of the corruption issues here:
     # https://github.com/qutebrowser/qutebrowser/issues/515
 
-    path = os.path.join(standarddir.config(auto=True), 'qsettings')
+    path = str(pathlib.Path(standarddir.config(auto=True)) / 'qsettings')
     for fmt in [QSettings.NativeFormat, QSettings.IniFormat]:
         QSettings.setPath(fmt, QSettings.UserScope, path)
