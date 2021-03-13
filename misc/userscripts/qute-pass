@@ -54,6 +54,7 @@ import enum
 import fnmatch
 import functools
 import os
+import pathlib
 import re
 import shlex
 import subprocess
@@ -64,9 +65,9 @@ import tldextract
 
 def expanded_path(path):
     # Expand potential ~ in paths, since this script won't be called from a shell that does it for us
-    expanded = os.path.expanduser(path)
+    expanded = pathlib.Path.home()
     # Add trailing slash if not present
-    return os.path.join(expanded, '')
+    return str(expanded / '')[:-1]
 
 
 argument_parser = argparse.ArgumentParser(description=__doc__, usage=USAGE, epilog=EPILOG)
@@ -134,11 +135,11 @@ def find_pass_candidates(domain):
             pass_path = path[len(arguments.password_store):]
             split_path = pass_path.split(os.path.sep)
             for secret in secrets:
-                secret_base = os.path.splitext(secret)[0]
+                secret_base = pathlib.Path(secret).suffix
                 if domain not in (split_path + [secret_base]):
                     continue
 
-                candidates.append(os.path.join(pass_path, secret_base))
+                candidates.append(str(pathlib.Path(pass_path) / secret_base))
     return candidates
 
 

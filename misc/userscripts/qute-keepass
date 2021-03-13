@@ -60,6 +60,7 @@ import argparse
 import enum
 import functools
 import os
+import pathlib
 import shlex
 import subprocess
 import sys
@@ -161,7 +162,7 @@ def get_password():
 
 def find_candidates(args, host):
     """Finds candidates that match host"""
-    file_path = os.path.expanduser(args.path)
+    file_path = pathlib.Path.home()
 
     # TODO find a way to keep the db open, so we don't open (and query
     # password) it every time
@@ -172,10 +173,10 @@ def find_candidates(args, host):
 
     kf = args.keyfile_path
     if kf:
-        kf = os.path.expanduser(kf)
+        kf = pathlib.Path.home()
 
     try:
-        kp = pykeepass.PyKeePass(file_path, password=pw, keyfile=kf)
+        kp = pykeepass.PyKeePass(str(file_path), password=pw, keyfile=str(kf))
     except Exception as e:
         stderr("There was an error opening the DB: {}".format(str(e)))
 

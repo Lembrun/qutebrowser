@@ -2,8 +2,9 @@
 
 import sys
 import os
+import pathlib
 
-sys.path.insert(0, os.getcwd())
+sys.path.insert(0, str(pathlib.Path.cwd()))
 from scripts import setupcommon
 
 from qutebrowser.extensions import loader
@@ -21,7 +22,7 @@ def get_data_files():
         ('../qutebrowser/config/configdata.yml', 'config'),
     ]
 
-    if os.path.exists(os.path.join('qutebrowser', '3rdparty', 'pdfjs')):
+    if (pathlib.Path('qutebrowser') / '3rdparty' / 'pdfjs').exists():
         data_files.append(('../qutebrowser/3rdparty/pdfjs', '3rdparty/pdfjs'))
     else:
         print("Warning: excluding pdfjs as it's not present!")

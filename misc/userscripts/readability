@@ -11,15 +11,13 @@
 #   :spawn --userscript readability
 #
 from __future__ import absolute_import
-import codecs, os
+import codecs, os, pathlib
 
-tmpfile = os.path.join(
-    os.environ.get('QUTE_DATA_DIR',
-                   os.path.expanduser('~/.local/share/qutebrowser')),
-    'userscripts/readability.html')
+tmpfile = pathlib.Path(os.environ.get('QUTE_DATA_DIR')) / pathlib.Path.home()
+/ '.local/share/qutebrowser' / 'userscripts/readability.html'
 
-if not os.path.exists(os.path.dirname(tmpfile)):
-    os.makedirs(os.path.dirname(tmpfile))
+if not tmpfile.parent.exists():
+    tmpfile.parent.mkdir(parents=True)
 
 # Styling for dynamic window margin scaling and line height
 HEADER = """

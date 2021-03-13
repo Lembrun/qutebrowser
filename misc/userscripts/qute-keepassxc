@@ -75,6 +75,7 @@ GPG might then ask for your private-key passwort whenever you query the database
 
 import sys
 import os
+import pathlib
 import socket
 import json
 import base64
@@ -88,7 +89,9 @@ import nacl.public
 def parse_args():
     parser = argparse.ArgumentParser(description="Full passwords from KeepassXC")
     parser.add_argument('url', nargs='?', default=os.environ.get('QUTE_URL'))
-    parser.add_argument('--socket', '-s', default='/run/user/{}/org.keepassxc.KeePassXC.BrowserServer'.format(os.getuid()),
+    parser.add_argument('--socket', '-s',
+                        default='/run/user/{}/org.keepassxc.KeePassXC.BrowserServer'
+                        .format(pathlib.Path().getuid()),
                         help='Path to KeepassXC browser socket')
     parser.add_argument('--key', '-k', default='alice@example.com',
                         help='GPG key to encrypt KeepassXC auth key with')
@@ -117,7 +120,7 @@ class KeepassXC:
         self.cryptobox   = None
 
     def connect(self):
-        if not os.path.exists(self.socket_path):
+        if not pathlib.Path(self.socket_path).exists():
             raise KeepassError(-1, "KeepassXC Browser socket does not exists")
         self.client_id = base64.b64encode(nacl.utils.random(nacl.public.Box.NONCE_SIZE)).decode('utf-8')
         self.sock.connect(self.socket_path)
@@ -209,16 +212,16 @@ class SecretKeyStore:
     def __init__(self, gpgkey):
         self.gpgkey = gpgkey
         if gpgkey is None:
-            self.path = os.path.join(os.environ['QUTE_DATA_DIR'], 'keepassxc.key')
+            self.path = pathlib.Path(os.environ['QUTE_DATA_DIR']) / 'keepassxc.key'
         else:
-            self.path = os.path.join(os.environ['QUTE_DATA_DIR'], 'keepassxc.key.gpg')
+            self.path = pathlib.Path(os.environ['QUTE_DATA_DIR']) / 'keepassxc.key.gpg'
 
     def load(self):
         "Load existing association key from file"
         if self.gpgkey is None:
-            jsondata = open(self.path, 'r').read()
+            jsondata = self.path.read_text()
         else:
-            jsondata = subprocess.check_output(['gpg', '--decrypt', self.path]).decode('utf-8')
+            jsondata = subprocess.check_output(['gpg', '--decrypt', str(self.path)]).decode('utf-8')
         data = json.loads(jsondata)
         self.id = data['id']
         self.key = base64.b64decode(data['key'])
@@ -233,9 +236,9 @@ class SecretKeyStore:
         self.id = id
         jsondata = json.dumps({'id':self.id, 'key':base64.b64encode(self.key).decode('utf-8')})
         if self.gpgkey is None:
-            open(self.path, "w").write(jsondata)
+            self.path.write_text(jsondata)
         else:
-            subprocess.run(['gpg', '--encrypt', '-o', self.path, '-r', self.gpgkey], input=jsondata.encode('utf-8'), check=True)
+            subprocess.run(['gpg', '--encrypt', '-o', str(self.path), '-r', self.gpgkey], input=jsondata.encode('utf-8'), check=True)
 
 
 def qute(cmd):
@@ -252,7 +255,7 @@ def error(msg):
 def connect_to_keepassxc(args):
     assert args.key or args.insecure, "Missing GPG key to use for auth key encryption"
     keystore = SecretKeyStore(args.key)
-    if os.path.isfile(keystore.path):
+    if pathlib.Path(keystore.path).is_file():
         keystore.load()
         kp = KeepassXC(keystore.id, key=keystore.key, socket_path=args.socket)
         kp.connect()
