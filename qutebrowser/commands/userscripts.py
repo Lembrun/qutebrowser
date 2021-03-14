@@ -191,7 +191,7 @@ class _BaseUserscriptRunner(QObject):
         for fn in tempfiles:
             log.procs.debug("Deleting temporary file {}.".format(fn))
             try:
-                os.remove(fn)
+                pathlib.Path(fn).unlink()
             except OSError as e:
                 # NOTE: Do not replace this with "raise CommandError" as it's
                 # executed async.
@@ -395,8 +395,8 @@ def _lookup_path(cmd):
     """
     directories = [
         pathlib.Path(standarddir.data()) / "userscripts",
-        pathlib.Path(standarddir.data(system=True)), "userscripts",
-        pathlib.Path(standarddir.config()) / "userscripts",
+        pathlib.Path(standarddir.data(system=True)) / "userscripts",
+        pathlib.Path(standarddir.config()) / "userscripts"
     ]
     for directory in directories:
         cmd_path = directory / cmd
@@ -447,7 +447,7 @@ def run_async(tab, cmd, *args, win_id, env, verbose=False,
                                               window=win_id).text()
     env['QUTE_VERSION'] = qutebrowser.__version__
 
-    cmd_path = pathlib.Path.home() / cmd
+    cmd_path = pathlib.Path(cmd).expanduser()
 
     # if cmd is not given as an absolute path, look it up
     # ~/.local/share/qutebrowser/userscripts (or $XDG_DATA_HOME)
@@ -461,7 +461,7 @@ def run_async(tab, cmd, *args, win_id, env, verbose=False,
     runner.finished.connect(commandrunner.deleteLater)
     runner.finished.connect(runner.deleteLater)
 
-    runner.prepare_run(cmd_path, *args, env=env, verbose=verbose,
+    runner.prepare_run(str(cmd_path), *args, env=env, verbose=verbose,
                        output_messages=output_messages)
     tab.dump_async(runner.store_html)
     tab.dump_async(runner.store_text, plain=True)
