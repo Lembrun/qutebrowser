@@ -19,7 +19,6 @@
 
 """Functions related to host blocking."""
 
-import os
 import pathlib
 import posixpath
 import zipfile
@@ -277,7 +276,7 @@ class HostBlocker:
         """Update files when the config changed."""
         if not config.val.content.blocking.hosts.lists:
             try:
-                os.remove(self._local_hosts_file)
+                pathlib.Path(self._local_hosts_file).unlink()
             except FileNotFoundError:
                 pass
             except OSError as e:
