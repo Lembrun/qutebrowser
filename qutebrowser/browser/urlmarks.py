@@ -231,7 +231,7 @@ class BookmarkManager(UrlMarkManager):
     """
 
     def _init_lineparser(self):
-        bookmarks_directory = pathlib.Path(standarddir.config() / 'bookmarks'
+        bookmarks_directory = pathlib.Path(standarddir.config()) / 'bookmarks'
         bookmarks_directory.mkdir(exist_ok=True)
 
         bookmarks_subdir = pathlib.Path('bookmarks') / 'urls'

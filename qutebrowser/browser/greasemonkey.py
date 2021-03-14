@@ -283,7 +283,7 @@ class GreasemonkeyManager(QObject):
         for scripts_dir in _scripts_dirs():
             scripts_dir = scripts_dir.resolve()
             log.greasemonkey.debug("Reading scripts from: {}".format(scripts_dir))
-            for script_filename in glob.glob(scripts_dir / '*.js'):
+            for script_filename in glob.glob(str(scripts_dir / '*.js')):
                 if not pathlib.Path(script_filename).is_file():
                     continue
                 script_path = scripts_dir / script_filename

@@ -498,8 +498,8 @@ def qute_pastebin_version(_url: QUrl) -> _HandlerRet:
 
 def _pdf_path(filename: str) -> str:
     """Get the path of a temporary PDF file."""
-    return str(pathlib.Path(downloads.temp_download_manager.get_tmpdir().name
-                        / filename))
+    return str(pathlib.Path(downloads.temp_download_manager.get_tmpdir().name)
+               / filename)
 
 
 @add_handler('pdfjs')

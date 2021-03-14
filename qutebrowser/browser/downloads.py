@@ -22,9 +22,9 @@
 import re
 import sys
 import html
-import pathlib
 import collections
 import functools
+import os.path
 import pathlib
 import tempfile
 import enum
@@ -162,15 +162,14 @@ def create_full_filename(basename, filename):
     # See https://github.com/qutebrowser/qutebrowser/issues/427
     encoding = sys.getfilesystemencoding()
     filename = pathlib.Path(utils.force_encoding(filename, encoding))
-    if filename.is_absolute() and filename.is_dir() or
-                                    str(filename).endswith(os.sep):
+    if filename.is_absolute() and filename.is_dir() or str(filename).endswith(os.sep):
         # We got an absolute directory from the user, so we save it under
         # the default filename in that directory.
-        return filename / basename
+        return str(filename / basename)
     elif filename.is_absolute():
         # We got an absolute filename from the user, so we save it under
         # that filename.
-        return filename
+        return str(filename)
     return None
 
 
@@ -226,7 +225,7 @@ def suggested_fn_from_title(url_path, title=None):
         not found in the whitelist (or if there is no page title).
     """
     ext_whitelist = [".html", ".htm", ".php", ""]
-    _, ext = pathlib.Path(url_path).suffix
+    _, ext = os.path.splitext(url_path)
 
     suggested_fn: Optional[str] = None
     if ext.lower() in ext_whitelist and title:
@@ -689,15 +688,15 @@ class AbstractDownloadItem(QObject):
                                 downloads.
         """
         filename = pathlib.Path(filename).expanduser()
-        self._ensure_can_set_filename(filename)
+        self._ensure_can_set_filename(str(filename))
 
-        self._filename = create_full_filename(self.basename, filename)
+        self._filename = create_full_filename(self.basename, str(filename))
         if self._filename is None:
             # We only got a filename (without directory) or a relative path
             # from the user, so we append that to the default directory and
             # try again.
             self._filename = create_full_filename(
-                self.basename, pathlib.Path(download_dir()) / filename)
+                self.basename, str(pathlib.Path(download_dir()) / filename))
 
         # At this point, we have a misconfigured XDG_DOWNLOAD_DIR, as
         # download_dir() + filename is still no absolute path.
@@ -714,11 +713,11 @@ class AbstractDownloadItem(QObject):
             self._filename = create_full_filename(self.basename,
                                                   str(pathlib.Path.home()))
 
-        dirname = self._filename.parent
+        dirname = pathlib.Path(self._filename).parent
         if not dirname.exists():
             txt = ("<b>{}</b> does not exist. Create it?".
                    format(html.escape(
-                       dirname / "")))
+                       str(dirname / ""))))
             self._ask_create_parent_question("Create directory?", txt,
                                              force_overwrite,
                                              remember_directory)
@@ -739,13 +738,13 @@ class AbstractDownloadItem(QObject):
         global last_used_directory
 
         try:
-            self._filename.parent.mkdir(exist_ok=True)
+            pathlib.Path(self._filename).parent.mkdir(exist_ok=True)
         except OSError as e:
             self._die(e.strerror)
 
-        self.basename = self._filename.name
+        self.basename = pathlib.Path(self._filename).name
         if remember_directory:
-            last_used_directory = self._filename.parent
+            last_used_directory = str(pathlib.Path(self._filename).parent)
 
         log.downloads.debug("Setting filename to {}".format(self._filename))
         if self._get_conflicting_download():
@@ -756,15 +755,15 @@ class AbstractDownloadItem(QObject):
                 custom_yes_action=self._cancel_conflicting_download)
         elif force_overwrite:
             self._after_set_filename()
-        elif self._filename.is_file():
+        elif pathlib.Path(self._filename).is_file():
             # The file already exists, so ask the user if it should be
             # overwritten.
             txt = "<b>{}</b> already exists. Overwrite?".format(
                 html.escape(self._filename))
             self._ask_confirm_question("Overwrite existing file?", txt)
         # FIFO, device node, etc. Make sure we want to do this
-        elif self._filename.exists() and
-              not self._filename.is_dir():
+        elif (pathlib.Path(self._filename).exists()
+        and not pathlib.Path(self._filename).is_dir()):
             txt = ("<b>{}</b> already exists and is a special file. Write to "
                    "it anyways?".format(html.escape(self._filename)))
             self._ask_confirm_question("Overwrite special file?", txt)

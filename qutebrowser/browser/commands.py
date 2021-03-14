@@ -1101,17 +1101,17 @@ class CommandDispatcher:
             caret = self._current_widget().caret
             caret.selection(callback=_selection_callback)
         else:
-            cmd = pathlib.Path(cmd).expanduser()
+            cmd = str(pathlib.Path(cmd).expanduser())
             proc = guiprocess.GUIProcess(what='command', verbose=verbose,
                                          output_messages=output_messages,
                                          parent=self._tabbed_browser)
             if detach:
-                ok = proc.start_detached(str(cmd), args)
+                ok = proc.start_detached(cmd, args)
                 if not ok:
                     message.info("Hint: Try without --detach for a more "
                                  "detailed error")
             else:
-                proc.start(str(cmd), args)
+                proc.start(cmd, args)
             proc.finished.connect(_on_proc_finished)
 
     def _run_userscript(self, selection, cmd, args, verbose, output_messages,
