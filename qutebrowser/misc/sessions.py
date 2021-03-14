@@ -168,7 +168,7 @@ class SessionManager(QObject):
         """
         path = pathlib.Path(name).expanduser()
         if path.is_absolute() and ((not check_exists) or
-                                    (path).exists()):
+                                   (path).exists()):
             return str(path)
         else:
             path = (pathlib.Path(self._base_path) / name).with_suffix('.yml')
