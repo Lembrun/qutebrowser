@@ -1493,11 +1493,11 @@ class File(BaseType):
         elif not value:
             return None
 
-        value = pathlib.Path(value).expanduser()
+        value = str(pathlib.Path(value).expanduser())
         value = os.path.expandvars(value)
         try:
             if not pathlib.Path(value).is_absolute():
-                value = pathlib.Path(standarddir.config()) / value
+                value = str(pathlib.Path(standarddir.config()) / value)
 
             if self.required and not pathlib.Path(value).is_file():
                 raise configexc.ValidationError(
@@ -1525,7 +1525,7 @@ class Directory(BaseType):
         elif not value:
             return None
         value = os.path.expandvars(value)
-        value = pathlib.Path(value).expanduser()
+        value = str(pathlib.Path(value).expanduser())
         try:
             if not pathlib.Path(value).is_dir():
                 raise configexc.ValidationError(

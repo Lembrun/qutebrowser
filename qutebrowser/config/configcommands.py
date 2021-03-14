@@ -397,17 +397,17 @@ class ConfigCommands:
             clear: Clear current settings first.
         """
         if filename is None:
-            filename = pathlib.Path(standarddir.config_py())
+            filename = str(pathlib.Path(standarddir.config_py()))
         else:
-            filename = pathlib.Path(filename).expanduser()
-            if not filename.is_absolute():
-                filename = pathlib.Path(standarddir.config() / filename
+            filename = str(pathlib.Path(filename).expanduser())
+            if not pathlib.Path(filename).is_absolute():
+                filename = str(pathlib.Path(standarddir.config()) / filename)
 
         if clear:
             self.config_clear()
 
         try:
-            configfiles.read_config_py(str(filename))
+            configfiles.read_config_py(filename)
         except configexc.ConfigFileErrors as e:
             raise cmdutils.CommandError(e)
 
@@ -446,13 +446,13 @@ class ConfigCommands:
             defaults: Write the defaults instead of values configured via :set.
         """
         if filename is None:
-            filename = pathlib.Path(standarddir.config_py())
+            filename = str(pathlib.Path(standarddir.config_py()))
         else:
-            filename = pathlib.Path(filename).expanduser()
-            if not filename.is_absolute():
-                filename = pathlib.Path(standarddir.config()) / filename
+            filename = str(pathlib.Path(filename).expanduser())
+            if not pathlib.Path(filename).is_absolute():
+                filename = str(pathlib.Path(standarddir.config()) / filename)
 
-        if filename.exists() and not force:
+        if pathlib.Path(filename).exists() and not force:
             raise cmdutils.CommandError("{} already exists - use --force to "
                                         "overwrite!".format(filename))
 
@@ -472,6 +472,6 @@ class ConfigCommands:
         writer = configfiles.ConfigPyWriter(options, bindings,
                                             commented=commented)
         try:
-            writer.write(str(filename))
+            writer.write(filename)
         except OSError as e:
             raise cmdutils.CommandError(str(e))

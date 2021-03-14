@@ -174,8 +174,8 @@ class YamlConfig(QObject):
 
     def __init__(self, parent: QObject = None) -> None:
         super().__init__(parent)
-        self._filename = pathlib.Path(standarddir.config(auto=True))
-        / 'autoconfig.yml'
+        self._filename = str((pathlib.Path(standarddir.config(auto=True))
+        / 'autoconfig.yml'))
         self._dirty = False
 
         self._values: Dict[str, configutils.Values] = {}
@@ -685,7 +685,8 @@ class ConfigAPI:
         if not pathlib.Path(filename).is_absolute():
             # We don't use self.configdir here so we get the proper file when starting
             # with a --config-py argument given.
-            filename = (pathlib.Path(standarddir.config_py()) / filename).parent
+            filename = str((pathlib.Path(standarddir.config_py())
+                            / filename).parent)
 
         try:
             read_config_py(str(filename))
