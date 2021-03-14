@@ -674,9 +674,10 @@ class FilenamePrompt(_BasePrompt):
             clicked: Whether the element was clicked.
         """
         if index == QModelIndex():
-            path = pathlib.Path(self._file_model.rootPath()) / self._to_complete
+            path = str(pathlib.Path(self._file_model.rootPath())
+                       / self._to_complete)
         else:
-            path = pathlib.Path(self._file_model.filePath(index))
+            path = str(pathlib.Path(self._file_model.filePath(index)).resolve())
 
         if clicked:
             path += os.sep
