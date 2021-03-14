@@ -48,7 +48,7 @@ def remove(path):
     else:
         print("rm '{}'".format(path))
         if '--dry-run' not in sys.argv:
-            os.remove(path)
+            pathlib.Path(path).unlink()
 
 
 def main():

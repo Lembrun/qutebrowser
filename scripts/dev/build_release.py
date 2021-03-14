@@ -68,8 +68,8 @@ def call_tox(toxenv, *args, python=sys.executable):
     """
     env = os.environ.copy()
     env['PYTHON'] = python
-    env['PATH'] = os.environ['PATH'] + os.pathsep
-    + str(pathlib.Path(python).parent)
+    env['PATH'] = (os.environ['PATH'] + os.pathsep
+    + str(pathlib.Path(python).parent))
     subprocess.run(
         [sys.executable, '-m', 'tox', '-vv', '-e', toxenv] + list(args),
         env=env, check=True)
@@ -173,11 +173,11 @@ def patch_mac_app():
         plistlib.dump(plist_data, f)
 
     # Replace some duplicate files by symlinks
-    framework_path = app_path / 'Contents' / 'MacOS' / 'PyQt5'
-    / 'Qt' / 'lib' / 'QtWebEngineCore.framework'
+    framework_path = (app_path / 'Contents' / 'MacOS' / 'PyQt5'
+    / 'Qt' / 'lib' / 'QtWebEngineCore.framework')
 
     core_lib = framework_path / 'Versions' / '5' / 'QtWebEngineCore'
-    os.remove(core_lib)
+    core_lib.unlink()
     core_target = pathlib.Path(*['..'] * 7) / 'MacOS' / 'QtWebEngineCore'
     core_lib.symlink_to(core_target)
 
@@ -188,7 +188,7 @@ def patch_mac_app():
         if file_path.is_dir():
             shutil.rmtree(file_path)
         else:
-            os.remove(file_path)
+            file_path.unlink()
         file_path.symlink_to(target)
 
 
@@ -224,7 +224,7 @@ def build_mac():
     utils.print_title("Cleaning up...")
     for f in ['wc.dmg', 'template.dmg']:
         try:
-            os.remove(f)
+            pathlib.Path(f).unlink()
         except FileNotFoundError:
             pass
     for d in ['dist', 'build']:
@@ -244,17 +244,17 @@ def build_mac():
     utils.print_title("Running smoke test")
 
     try:
-        with tempfile.TemporaryDirectory() as tmpdir:
+        with tempfile.TemporaryDirectory() as tdir:
             subprocess.run(['hdiutil', 'attach', dmg_name,
-                            '-mountpoint', tmpdir], check=True)
+                            '-mountpoint', tdir], check=True)
             try:
-                binary = pathlib.Path(tmpdir) / 'qutebrowser.app' / 'Contents'
-                / 'MacOS' / 'qutebrowser'
+                binary = (pathlib.Path(tdir) / 'qutebrowser.app' / 'Contents'
+                / 'MacOS' / 'qutebrowser')
                 smoke_test(str(binary))
             finally:
                 print("Waiting 10s for dmg to be detachable...")
                 time.sleep(10)
-                subprocess.run(['hdiutil', 'detach', tmpdir], check=False)
+                subprocess.run(['hdiutil', 'detach', tdir], check=False)
     except PermissionError as e:
         print("Failed to remove tempdir: {}".format(e))
 
@@ -288,8 +288,8 @@ def _build_windows_single(*, x64, skip_packaging):
     human_arch = '64-bit' if x64 else '32-bit'
     utils.print_title(f"Running pyinstaller {human_arch}")
 
-    outdir = pathlib.Path('dist') /
-    f'qutebrowser-{qutebrowser.__version__}-{"x64" if x64 else "x86"}'
+    outdir = (pathlib.Path('dist') /
+    f'qutebrowser-{qutebrowser.__version__}-{"x64" if x64 else "x86"}')
     _maybe_remove(str(outdir))
 
     python = _get_windows_python_path(x64=x64)
@@ -382,8 +382,8 @@ def build_sdist():
     _maybe_remove('dist')
 
     subprocess.run([sys.executable, 'setup.py', 'sdist'], check=True)
-    dist_files = pathlib.Path('dist').resolve().iterdir()
-    assert len(list(dist_files)) == 1
+    dist_files = list(pathlib.Path('dist').resolve().iterdir())
+    assert len(dist_files) == 1
 
     dist_file = pathlib.Path('dist') / dist_files[0]
     subprocess.run(['gpg', '--detach-sign', '-a', str(dist_file)], check=True)
@@ -408,9 +408,9 @@ def build_sdist():
 
     filename = 'qutebrowser-{}.tar.gz'.format(qutebrowser.__version__)
     artifacts = [
-        (str(pathlib.Path('dist' /) filename), 'application/gzip', 'Source release'),
-        (str(pathlib.Path('dist') / filename.with_suffix('.asc'))), 'application/pgp-signature',
-         'Source release - PGP signature'),
+        (str(pathlib.Path('dist') / filename), 'application/gzip', 'Source release'),
+        (((str((pathlib.Path('dist') / filename).with_suffix('.asc')))),
+         'application/pgp-signature', 'Source release - PGP signature')
     ]
 
     return artifacts

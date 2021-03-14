@@ -22,8 +22,8 @@
 
 import re
 import sys
+import os
 import pathlib
-import glob
 import subprocess
 import tempfile
 import argparse
@@ -32,7 +32,8 @@ sys.path.insert(0, str(pathlib.Path(__file__).parent / '..' / '..'))
 
 from scripts import utils
 
-REPO_DIR = pathlib.Path(__file__).resolve().parent / '..' / '..' # /scripts/dev -> /scripts -> /
+# /scripts/dev -> /scripts -> /
+REPO_DIR = pathlib.Path(__file__).resolve().parent / '..' / '..'
 REQ_DIR = REPO_DIR / 'misc' / 'requirements'
 
 CHANGELOG_URLS = {
@@ -519,9 +520,9 @@ def test_tox():
     host_python = get_host_python('tox')
     req_path = REQ_DIR / 'requirements-tox.txt'
 
-    with tempfile.TemporaryDirectory() as tmpdir:
-        venv_dir = pathlib.Path(tmpdir) / 'venv'
-        tox_workdir = pathlib.Path(tmpdir) / 'tox-workdir'
+    with tempfile.TemporaryDirectory() as tdir:
+        venv_dir = pathlib.Path(tdir) / 'venv'
+        tox_workdir = pathlib.Path(tdir) / 'tox-workdir'
         venv_python = get_venv_python(venv_dir)
         init_venv(host_python, venv_dir, req_path)
         list_proc = subprocess.run([str(venv_python), '-m', 'tox', '--listenvs'],

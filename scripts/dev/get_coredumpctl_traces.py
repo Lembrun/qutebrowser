@@ -20,7 +20,6 @@
 
 """Get qutebrowser crash information and stacktraces from coredumpctl."""
 
-import os
 import pathlib
 import sys
 import argparse
@@ -115,7 +114,7 @@ def is_qutebrowser_dump(parsed):
 def dump_infos_gdb(parsed):
     """Dump all needed infos for the given crash using gdb."""
     with tempfile.TemporaryDirectory() as tempdir:
-        coredump = pathlib.Path(tempdir) /  'dump'
+        coredump = pathlib.Path(tempdir) / 'dump'
         subprocess.run(['coredumpctl', 'dump', '-o', str(coredump),
                         str(parsed.pid)], check=True)
         subprocess.run(['gdb', parsed.exe, str(coredump),

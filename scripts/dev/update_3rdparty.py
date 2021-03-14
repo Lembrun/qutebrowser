@@ -44,10 +44,10 @@ def download_nsis_plugins():
                  'Demos/Common/Utils.nsh')
     dll_files = ('Plugins/x86-unicode/UAC.dll',
                  'Plugins/x86-unicode/StdUtils.dll')
-    include_dir = pathlib.Path(__file__).resolve().parent /
-    '..' / '..' / 'misc' / 'nsis' / 'include'
-    plugins_dir = pathlib.Path(__file__).resolve().parent /
-    '..' / '..' / 'misc' / 'nsis' / 'plugins' / 'x86-unicode'
+    include_dir = (pathlib.Path(__file__).resolve().parent
+                   / '..' / '..' / 'misc' / 'nsis' / 'include')
+    plugins_dir = (pathlib.Path(__file__).resolve().parent
+                   / '..' / '..' / 'misc' / 'nsis' / 'plugins' / 'x86-unicode')
     include_dir.mkdir(exist_ok=True)
     plugins_dir.mkdir(exist_ok=True)
     print("=> Downloading NSIS plugins")
@@ -135,8 +135,8 @@ def update_ace():
     """
     print("Updating ACE...")
     url = 'https://raw.githubusercontent.com/ajaxorg/ace-builds/master/src/ace.js'
-    target_path = pathlib.Path('tests') / 'end2end'
-    / 'data' / 'hints' / 'ace' / 'ace.js'
+    target_path = (pathlib.Path('tests') / 'end2end'
+    / 'data' / 'hints' / 'ace' / 'ace.js')
     urllib.request.urlretrieve(url, str(target_path))
     urllib.request.urlcleanup()
 

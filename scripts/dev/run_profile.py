@@ -23,7 +23,6 @@
 import sys
 import cProfile
 import pathlib
-import os
 import tempfile
 import subprocess
 import shutil
@@ -85,7 +84,7 @@ def main():
         # yep, shell=True. I know what I'm doing.
         subprocess.run(
             'gprof2dot -f pstats {} | dot -Tpng | feh -F -'.format(
-                shlex.quote(str(profilefile)), shell=True, check=True)
+                shlex.quote(str(profilefile))), shell=True, check=True)
     elif args.profile_tool == 'kcachegrind':
         callgraphfile = pathlib.Path(tempdir) / 'callgraph'
         subprocess.run(['pyprof2calltree', '-k', '-i', str(profilefile),

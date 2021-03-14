@@ -21,7 +21,7 @@
 """Run vulture on the source files and filter out false-positives."""
 
 import sys
-import os
+import pathlib
 import re
 import tempfile
 import inspect
@@ -181,7 +181,7 @@ def run(files):
         vult = vulture.Vulture(verbose=False)
         vult.scavenge(files + [whitelist_file.name])
 
-        os.remove(whitelist_file.name)
+        pathlib.Path(whitelist_file.name).unlink()
 
     filters = {
         'unused_funcs': filter_func,

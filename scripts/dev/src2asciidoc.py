@@ -20,7 +20,6 @@
 
 """Generate asciidoc source for qutebrowser based on docstrings."""
 
-import os
 import pathlib
 import sys
 import shutil
@@ -520,10 +519,10 @@ def _format_block(filename, what, data):
             raise Exception("Marker '// QUTE_{}_END' not found in "
                             "'{}'!".format(what, filename))
     except:
-        os.remove(tmpname)
+        pathlib.Path(tmpname).unlink()
         raise
     else:
-        os.remove(filename)
+        pathlib.Path(filename).unlink()
         shutil.move(tmpname, filename)
 
 

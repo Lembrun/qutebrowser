@@ -20,7 +20,6 @@
 
 """Various small code checkers."""
 
-import os
 import re
 import sys
 import argparse
