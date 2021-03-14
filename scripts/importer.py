@@ -307,7 +307,7 @@ def import_chrome(profile, bookmark_types, output_format):
     }
 
     if 'search' in bookmark_types:
-        webdata = sqlite3.connect(profile / 'Web Data')
+        webdata = sqlite3.connect(str(profile / 'Web Data'))
         c = webdata.cursor()
         c.execute('SELECT keyword,url FROM keywords;')
         for keyword, url in c:
