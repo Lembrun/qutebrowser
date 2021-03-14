@@ -39,9 +39,10 @@ class TestBaseLineParser:
 
     def test_prepare_save_missing(self, mocker, lineparser):
         """Test if _prepare_save does what it's supposed to do."""
-        os_mock = mocker.patch('qutebrowser.misc.lineparser.os')
+        pathlib_mock = mocker.patch('qutebrowser.misc.lineparser.pathlib.Path')
         lineparser._prepare_save()
-        os_mock.makedirs.assert_called_with(self.CONFDIR, 0o755, exist_ok=True)
+        pathlib_mock.assert_called_with(self.CONFDIR)
+        pathlib_mock().mkdir.assert_called_with(0o755, exist_ok=True)
 
     def test_double_open(self, mocker, lineparser):
         """Test if _open refuses reentry."""

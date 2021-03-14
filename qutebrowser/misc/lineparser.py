@@ -19,7 +19,6 @@
 
 """Parser for line-based files like histories."""
 
-import os
 import pathlib
 import contextlib
 from typing import Sequence
@@ -57,7 +56,7 @@ class BaseLineParser(QObject):
         """
         super().__init__(parent)
         self._configdir = configdir
-        self._configfile = pathlib.Path(self._configdir) / fname
+        self._configfile = str(pathlib.Path(self._configdir) / fname)
         self._fname = fname
         self._binary = binary
         self._opened = False
@@ -73,7 +72,7 @@ class BaseLineParser(QObject):
         Return:
             True if the file should be saved, False otherwise.
         """
-        pathlib.Path(self._configdir).mkdir(mode=0o755, exist_ok=True)
+        pathlib.Path(self._configdir).mkdir(0o755, exist_ok=True)
         return True
 
     def _after_save(self):
@@ -149,7 +148,7 @@ class LineParser(BaseLineParser):
             binary: Whether to open the file in binary mode.
         """
         super().__init__(configdir, fname, binary=binary, parent=parent)
-        if not self._configfile.is_file():
+        if not pathlib.Path(self._configfile).is_file():
             self.data: Sequence[str] = []
         else:
             log.init.debug("Reading {}".format(self._configfile))
@@ -225,8 +224,8 @@ class LimitLineParser(LineParser):
             return
         value = config.instance.get(option)
         if value == 0:
-            if self._configfile.exists():
-                os.remove(self._configfile)
+            if pathlib.Path(self._configfile).exists():
+                pathlib.Path(self._configfile).unlink()
 
     def save(self):
         """Save the config file."""
@@ -236,7 +235,7 @@ class LimitLineParser(LineParser):
         do_save = self._prepare_save()
         if not do_save:
             return
-        assert self._configfile is not None
+        assert pathlib.Path(self._configfile).exists() is not None
         with qtutils.savefile_open(self._configfile, self._binary) as f:
             self._write(f, self.data[-limit:])
         self._after_save()

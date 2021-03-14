@@ -19,8 +19,6 @@
 
 """Management of sessions - saved tabs/windows."""
 
-import os
-import pathlib
 import itertools
 import urllib
 import shutil
@@ -513,7 +511,7 @@ class SessionManager(QObject):
         """Delete a session."""
         path = self._get_session_path(name, check_exists=True)
         try:
-            os.remove(path)
+            pathlib.Path(path).unlink()
         except OSError as e:
             raise SessionError(e)
 
@@ -521,7 +519,8 @@ class SessionManager(QObject):
         """Get a list of all session names."""
         sessions = []
         for filename in pathlib.Path(self._base_path).iterdir():
-            base, ext = pathlib.Path(filename).suffix
+            base, ext = (str(pathlib.Path(filename).with_suffix('')),
+                         pathlib.Path(filename).suffix)
             if ext == '.yml':
                 sessions.append(base)
         return sorted(sessions)

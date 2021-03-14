@@ -388,7 +388,7 @@ class _BackendProblemChecker:
             return
 
         log.init.info("Qt version changed, nuking QtWebEngine cache")
-        cache_dir = pathlib.Path(standarddir.cache() / 'webengine'
+        cache_dir = pathlib.Path(standarddir.cache()) / 'webengine'
         if cache_dir.exists():
             shutil.rmtree(cache_dir)
 
@@ -412,10 +412,10 @@ class _BackendProblemChecker:
         else:
             return
 
-        service_worker_dir = pathlib.Path(
-            standarddir.data()) / 'webengine' / 'Service Worker'
-        bak_dir = pathlib.Path(service_worker_dir + '-bak')
-        if not service_worker_dir.exists():
+        service_worker_dir = str(pathlib.Path(
+            standarddir.data()) / 'webengine' / 'Service Worker')
+        bak_dir = str(pathlib.Path(service_worker_dir)) + '-bak'
+        if not pathlib.Path(service_worker_dir).exists():
             return
 
         log.init.info(
@@ -423,7 +423,7 @@ class _BackendProblemChecker:
 
         # Keep one backup around - we're not 100% sure what persistent data
         # could be in there, but this folder can grow to ~300 MB.
-        if bak_dir.exists():
+        if pathlib.Path(bak_dir).exists():
             shutil.rmtree(bak_dir)
 
         shutil.move(service_worker_dir, bak_dir)

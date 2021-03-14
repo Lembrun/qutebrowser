@@ -92,7 +92,7 @@ class Quitter(QObject):
         for dirpath, _dirnames, filenames in os.walk(path):
             for fn in filenames:
                 if pathlib.Path(fn).suffix == '.py' and pathlib.Path(fn).is_file():
-                    with tokenize.open(pathlib.Path(dirpath) / fn)) as f:
+                    with tokenize.open(pathlib.Path(dirpath) / fn) as f:
                         compile(f.read(), fn, 'exec')
 
     def _get_restart_args(

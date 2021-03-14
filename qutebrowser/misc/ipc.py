@@ -81,7 +81,7 @@ def _get_socketname(basedir):
 
     prefix = 'i-' if utils.is_mac else 'ipc-'
     filename = '{}{}'.format(prefix, md5)
-    return str(pathlib.Path(standarddir.runtime() / filename)
+    return str(pathlib.Path(standarddir.runtime()) / filename)
 
 
 class Error(Exception):

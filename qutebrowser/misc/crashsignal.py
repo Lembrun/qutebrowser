@@ -93,7 +93,7 @@ class CrashHandler(QObject):
             # First check if an old logfile exists.
             if logname.exists():
                 self._crash_log_data = logname.read_text(encoding='ascii')
-                os.remove(logname)
+                logname.unlink()
                 self._init_crashlogfile()
             else:
                 # There's no log file, so we can use this to display crashes to
@@ -149,7 +149,8 @@ class CrashHandler(QObject):
         """Start a new logfile and redirect faulthandler to it."""
         logname = pathlib.Path(standarddir.data()) / 'crash.log'
         try:
-            self._crash_log_file = logname.write_text(encoding='ascii')
+            self._crash_log_file = (logname.write_text(str(logname),
+                                                       encoding='ascii'))
         except OSError:
             log.init.exception("Error while opening crash log file!")
         else:
@@ -193,7 +194,7 @@ class CrashHandler(QObject):
             faulthandler.disable()  # type: ignore[unreachable]
         try:
             self._crash_log_file.close()
-            os.remove(self._crash_log_file.name)
+            pathlib.Path(self._crash_log_file.name).unlink()
         except OSError:
             log.destroy.exception("Could not remove crash log!")
 

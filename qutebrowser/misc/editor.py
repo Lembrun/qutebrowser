@@ -19,7 +19,6 @@
 
 """Launcher for an external editor."""
 
-import os
 import pathlib
 import tempfile
 
@@ -81,7 +80,7 @@ class ExternalEditor(QObject):
 
         try:
             if self._proc.exit_status() != QProcess.CrashExit:
-                os.remove(self._filename)
+                pathlib.Path(self._filename).unlink()
         except OSError as e:
             # NOTE: Do not replace this with "raise CommandError" as it's
             # executed async.
