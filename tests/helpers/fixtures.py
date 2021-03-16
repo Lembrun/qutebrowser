@@ -188,9 +188,7 @@ def testdata_scheme(qapp):
     def handler(url):  # pylint: disable=unused-variable
         file_abs = pathlib.Path(__file__).parent.resolve()
         filename = file_abs / '..' / 'end2end' / url.path().lstrip('/')
-        with filename.open('rb') as f:
-            data = f.read()
-
+        data = filename.read_bytes()
         mimetype, _encoding = mimetypes.guess_type(filename)
         return mimetype, data
 
@@ -551,7 +549,7 @@ def standarddir_tmpdir(folder, monkeypatch, tmp_path):
     Use this to avoid creating a 'real' config dir (~/.config/qute_test).
     """
     confdir = tmp_path / folder
-    confdir.mkdir(exist_ok=True)
+    confdir.mkdir()
     if hasattr(standarddir, folder):
         monkeypatch.setattr(standarddir, folder,
                             lambda **_kwargs: str(confdir))
