@@ -20,7 +20,6 @@
 """Utilities to get and initialize data/config paths."""
 
 import os
-import os.path
 import pathlib
 import sys
 import contextlib
@@ -84,7 +83,7 @@ def _init_config(args: Optional[argparse.Namespace]) -> None:
         if utils.is_windows:
             app_data_path = _writable_location(
                 QStandardPaths.AppDataLocation)
-            path = os.path.join(app_data_path, 'config')
+            path = str(pathlib.Path(app_data_path) / 'config')
         else:
             path = _writable_location(typ)
 
@@ -96,14 +95,14 @@ def _init_config(args: Optional[argparse.Namespace]) -> None:
     if utils.is_mac:
         path = _from_args(typ, args)
         if path is None:  # pragma: no branch
-            path = os.path.expanduser('~/.' + APPNAME)
+            path = str(pathlib.Path.home() / ('.' + APPNAME))
             _create(path)
             _locations[_Location.config] = path
 
-    config_py_file = os.path.join(_locations[_Location.config], 'config.py')
+    config_py_file = str(pathlib.Path(_locations[_Location.config]) / 'config.py')
     if getattr(args, 'config_py', None) is not None:
         assert args is not None
-        config_py_file = os.path.abspath(args.config_py)
+        config_py_file = str(pathlib.Path(args.config_py).resolve())
     _locations[_Location.config_py] = config_py_file
 
 
@@ -134,11 +133,11 @@ def _init_data(args: Optional[argparse.Namespace]) -> None:
     if path is None:
         if utils.is_windows:
             app_data_path = _writable_location(typ)  # same location as config
-            path = os.path.join(app_data_path, 'data')
+            path = str(pathlib.Path(app_data_path) / 'data')
         elif sys.platform.startswith('haiku'):
             # HaikuOS returns an empty value for AppDataLocation
             config_path = _writable_location(QStandardPaths.ConfigLocation)
-            path = os.path.join(config_path, 'data')
+            path = str(pathlib.Path(config_path) / 'data')
         else:
             path = _writable_location(typ)
 
@@ -175,7 +174,7 @@ def _init_cache(args: Optional[argparse.Namespace]) -> None:
         if utils.is_windows:
             # Local, not Roaming!
             data_path = _writable_location(QStandardPaths.AppLocalDataLocation)
-            path = os.path.join(data_path, 'cache')
+            path = str(pathlib.Path(data_path) / 'cache')
         else:
             path = _writable_location(typ)
 
@@ -302,7 +301,7 @@ def _from_args(
         suffix = basedir_suffix[typ]
     except KeyError:  # pragma: no cover
         return None
-    return os.path.abspath(os.path.join(args.basedir, suffix))
+    return str((pathlib.Path(args.basedir) / suffix).resolve())
 
 
 def _create(path: str) -> None:
@@ -320,7 +319,7 @@ def _create(path: str) -> None:
                 log.init.debug(f"{k} = {v}")
         raise Exception("Trying to create directory inside /home during "
                         "tests, this should not happen.")
-    os.makedirs(path, 0o700, exist_ok=True)
+    pathlib.Path(path).mkdir(0o700, exist_ok=True, parents=True)
 
 
 def _init_dirs(args: argparse.Namespace = None) -> None:
@@ -360,4 +359,4 @@ def _init_cachedir_tag() -> None:
                 f.write("# For information about cache directory tags, see:\n")
                 f.write("#  https://bford.info/cachedir/\n")
     except OSError:
-           log.init.exception("Failed to create CACHEDIR.TAG")
+        log.init.exception("Failed to create CACHEDIR.TAG")

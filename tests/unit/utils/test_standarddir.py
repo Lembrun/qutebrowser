@@ -20,7 +20,6 @@
 """Tests for qutebrowser.utils.standarddir."""
 
 import os
-import os.path
 import pathlib
 import sys
 import json
@@ -355,13 +354,14 @@ class TestCreatingDir:
         """
         (tmp_path / typ).mkdir()
 
-        m = mocker.patch('qutebrowser.utils.standarddir.os')
-        m.makedirs = os.makedirs
-        m.sep = os.sep
-        m.path.join = os.path.join
-        m.expanduser = os.path.expanduser
-        m.path.exists.return_value = False
-        m.path.abspath = lambda x: x
+        m = mocker.patch('qutebrowser.utils.standarddir.pathlib')
+        j = mocker.patch('qutebrowser.utils.standarddir.os')
+        m.Path.mkdir = pathlib.Path.mkdir
+        j.sep = os.sep
+        m.Path.join = pathlib.Path
+        m.Path.expanduser = pathlib.Path.expanduser
+        m.Path.exists.return_value = False
+        m.Path.resolve = lambda x: x
 
         args = types.SimpleNamespace(basedir=str(tmp_path))
         standarddir._init_dirs(args)
