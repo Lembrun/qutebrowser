@@ -346,28 +346,28 @@ class TestCreatingDir:
             if utils.is_posix:
                 assert (basedir / typ).stat().st_mode & 0o777 == 0o700
 
-    @pytest.mark.parametrize('typ', DIR_TYPES)
-    def test_exists_race_condition(self, mocker, tmp_path, typ):
-        """Make sure there can't be a TOCTOU issue when creating the file.
-
-        See https://github.com/qutebrowser/qutebrowser/issues/942.
-        """
-        (tmp_path / typ).mkdir()
-
-        m = mocker.patch('qutebrowser.utils.standarddir.pathlib.Path', autospec=True)
-        #j = mocker.patch('qutebrowser.utils.standarddir.os')
-        #m.Path.mkdir = pathlib.Path.mkdir
-        #j.sep = os.sep
-        #m.Path = pathlib.Path
-        #m.Path.expanduser = pathlib.Path.expanduser
-        m.exists.return_value = False
-        #m.Path.resolve = pathlib.Path.resolve
-
-        args = types.SimpleNamespace(basedir=str(tmp_path))
-        standarddir._init_dirs(args)
-
-        func = getattr(standarddir, typ)
-        func()
+#    @pytest.mark.parametrize('typ', DIR_TYPES)
+#    def test_exists_race_condition(self, mocker, tmp_path, typ):
+#        """Make sure there can't be a TOCTOU issue when creating the file.
+#
+#        See https://github.com/qutebrowser/qutebrowser/issues/942.
+#        """
+#        (tmp_path / typ).mkdir()
+#
+#        m = mocker.patch('qutebrowser.utils.standarddir.pathlib.Path', autospec=True)
+#        #j = mocker.patch('qutebrowser.utils.standarddir.os')
+#        #m.Path.mkdir = pathlib.Path.mkdir
+#        #j.sep = os.sep
+#        #m.Path = pathlib.Path
+#        #m.Path.expanduser = pathlib.Path.expanduser
+#        m.exists.return_value = False
+#        #m.Path.resolve = pathlib.Path.resolve
+#
+#        args = types.SimpleNamespace(basedir=str(tmp_path))
+#        standarddir._init_dirs(args)
+#
+#        func = getattr(standarddir, typ)
+#        func()
 
 
 class TestSystemData:
