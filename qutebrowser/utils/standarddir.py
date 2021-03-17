@@ -350,14 +350,14 @@ def _init_cachedir_tag() -> None:
 
     See https://bford.info/cachedir/
     """
-    cachedir_tag = os.path.join(cache(), 'CACHEDIR.TAG')
-    if not os.path.exists(cachedir_tag):
-        try:
-            with open(cachedir_tag, 'w', encoding='utf-8') as f:
+    cachedir_tag = pathlib.Path(cache()) / 'CACHEDIR.TAG'
+    try:
+        if not cachedir_tag.exists():
+            with cachedir_tag.open('w', encoding='utf-8') as f:
                 f.write("Signature: 8a477f597d28d172789f06886806bc55\n")
                 f.write("# This file is a cache directory tag created by "
                         "qutebrowser.\n")
                 f.write("# For information about cache directory tags, see:\n")
                 f.write("#  https://bford.info/cachedir/\n")
-        except OSError:
-            log.init.exception("Failed to create CACHEDIR.TAG")
+    except OSError:
+           log.init.exception("Failed to create CACHEDIR.TAG")
