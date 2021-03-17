@@ -21,6 +21,7 @@
 
 import os
 import os.path
+import pathlib
 import sys
 import json
 import types
@@ -226,7 +227,7 @@ class TestStandardDir:
         (standarddir.data, 2, ['Application Support', APPNAME]),
         (lambda: standarddir.config(auto=True), 1, [APPNAME]),
         (standarddir.config, 0,
-         os.path.expanduser('~').split(os.sep) + ['.qute_test']),
+         str(pathlib.Path.home()).split(os.sep) + ['.qute_test']),
         (standarddir.cache, 2, ['Caches', APPNAME]),
         (standarddir.download, 1, ['Downloads']),
     ])
@@ -378,7 +379,7 @@ class TestSystemData:
     def test_system_datadir_exist_linux(self, monkeypatch, tmp_path):
         """Test that /usr/share/qute_test is used if path exists."""
         monkeypatch.setenv('XDG_DATA_HOME', str(tmp_path))
-        monkeypatch.setattr(os.path, 'exists', lambda path: True)
+        monkeypatch.setattr(pathlib.Path, 'exists', lambda path: True)
         standarddir._init_data(args=None)
         assert standarddir.data(system=True) == "/usr/share/qute_test"
 
@@ -387,7 +388,7 @@ class TestSystemData:
                                             fake_args):
         """Test that system-wide path isn't used on linux if path not exist."""
         fake_args.basedir = str(tmp_path)
-        monkeypatch.setattr(os.path, 'exists', lambda path: False)
+        monkeypatch.setattr(pathlib.Path, 'exists', lambda path: False)
         standarddir._init_data(args=fake_args)
         assert standarddir.data(system=True) == standarddir.data()
 
