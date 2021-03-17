@@ -140,7 +140,7 @@ class TestWritableLocation:
     def test_sep(self, monkeypatch):
         """Make sure the right kind of separator is used."""
         monkeypatch.setattr(standarddir.os, 'sep', '\\')
-        monkeypatch.setattr(standarddir.pathlib.Path, 'joinpath',
+        monkeypatch.setattr(standarddir.os.path, 'join',
                             lambda *parts: '\\'.join(parts))
         loc = standarddir._writable_location(QStandardPaths.AppDataLocation)
         assert '/' not in loc
@@ -226,7 +226,7 @@ class TestStandardDir:
         (standarddir.data, 2, ['Application Support', APPNAME]),
         (lambda: standarddir.config(auto=True), 1, [APPNAME]),
         (standarddir.config, 0,
-         str(pathlib.Path.home()).split(os.sep) + ['.qute_test']),
+         os.path.expanduser('~').split(os.sep) + ['.qute_test']),
         (standarddir.cache, 2, ['Caches', APPNAME]),
         (standarddir.download, 1, ['Downloads']),
     ])

@@ -347,8 +347,7 @@ class GitStrSubprocessFake:
         retval = self.retval
         self.retval = self.UNSET
         gitpath = pathlib.Path(gitpath).resolve()
-        p = pathlib.Path(qutebrowser.__file__).parent
-        expected = p.parent
+        expected = (pathlib.Path(qutebrowser.__file__).parent).parent
         assert str(gitpath) == str(expected)
         return retval
 
