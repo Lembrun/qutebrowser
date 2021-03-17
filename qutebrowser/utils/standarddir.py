@@ -20,7 +20,7 @@
 """Utilities to get and initialize data/config paths."""
 
 import os
-import pathlib
+import os.path
 import sys
 import contextlib
 import enum
@@ -61,7 +61,6 @@ class EmptyValueError(Exception):
 @contextlib.contextmanager
 def _unset_organization() -> Iterator[None]:
     """Temporarily unset QApplication.organizationName().
-
     This is primarily needed in config.py.
     """
     qapp = QApplication.instance()
@@ -99,16 +98,15 @@ def _init_config(args: Optional[argparse.Namespace]) -> None:
             _create(path)
             _locations[_Location.config] = path
 
-    config_py_file = pathlib.Path(_locations[_Location.config]) / 'config.py'
+    config_py_file = os.path.join(_locations[_Location.config], 'config.py')
     if getattr(args, 'config_py', None) is not None:
         assert args is not None
-        config_py_file = pathlib.Path(args.config_py).resolve()
-    _locations[_Location.config_py] = str(config_py_file)
+        config_py_file = os.path.abspath(args.config_py)
+    _locations[_Location.config_py] = config_py_file
 
 
 def config(auto: bool = False) -> str:
     """Get the location for the config directory.
-
     If auto=True is given, get the location for the autoconfig.yml directory,
     which is different on macOS.
     """
@@ -119,7 +117,6 @@ def config(auto: bool = False) -> str:
 
 def config_py() -> str:
     """Get the location for config.py.
-
     Usually, config.py is in standarddir.config(), but this can be overridden
     with the --config-py argument.
     """
@@ -147,14 +144,13 @@ def _init_data(args: Optional[argparse.Namespace]) -> None:
     # system_data
     _locations.pop(_Location.system_data, None)  # Remove old state
     if utils.is_linux:
-        path = str(pathlib.Path('/usr/share/') / APPNAME)
-        if pathlib.Path(path).exists():
+        path = '/usr/share/' + APPNAME
+        if os.path.exists(path):
             _locations[_Location.system_data] = path
 
 
 def data(system: bool = False) -> str:
     """Get the data directory.
-
     If system=True is given, gets the system-wide (probably non-writable) data
     directory.
     """
@@ -188,7 +184,6 @@ def cache() -> str:
 
 def _init_download(args: Optional[argparse.Namespace]) -> None:
     """Initialize the location for downloads.
-
     Note this is only the default directory as found by Qt.
     Therefore, we also don't create it.
     """
@@ -242,7 +237,6 @@ def runtime() -> str:
 
 def _writable_location(typ: QStandardPaths.StandardLocation) -> str:
     """Wrapper around QStandardPaths.writableLocation.
-
     Arguments:
         typ: A QStandardPaths::StandardLocation member.
     """
@@ -270,7 +264,7 @@ def _writable_location(typ: QStandardPaths.StandardLocation) -> str:
     # QStandardsPaths not knowing the application name).
     if (typ != QStandardPaths.DownloadLocation and
             path.split(os.sep)[-1] != APPNAME):
-        path = str(pathlib.Path(path) / APPNAME)
+        path = os.path.join(path, APPNAME)
 
     return path
 
@@ -280,7 +274,6 @@ def _from_args(
         args: Optional[argparse.Namespace]
 ) -> Optional[str]:
     """Get the standard directory from an argparse namespace.
-
     Return:
         The overridden path, or None if there is no override.
     """
@@ -301,12 +294,11 @@ def _from_args(
         suffix = basedir_suffix[typ]
     except KeyError:  # pragma: no cover
         return None
-    return str((pathlib.Path(args.basedir) / suffix).resolve())
+    return os.path.abspath(os.path.join(args.basedir, suffix))
 
 
 def _create(path: str) -> None:
     """Create the `path` directory.
-
     From the XDG basedir spec:
         If, when attempting to write a file, the destination directory is
         non-existent an attempt should be made to create it with permission
@@ -319,12 +311,11 @@ def _create(path: str) -> None:
                 log.init.debug(f"{k} = {v}")
         raise Exception("Trying to create directory inside /home during "
                         "tests, this should not happen.")
-    pathlib.Path(path).mkdir(0o700, exist_ok=True, parents=True)
+    os.makedirs(path, 0o700, exist_ok=True)
 
 
 def _init_dirs(args: argparse.Namespace = None) -> None:
     """Create and cache standard directory locations.
-
     Mainly in a separate function because we need to call it in tests.
     """
     _init_config(args)
@@ -346,17 +337,16 @@ def init(args: Optional[argparse.Namespace]) -> None:
 
 def _init_cachedir_tag() -> None:
     """Create CACHEDIR.TAG if it doesn't exist.
-
     See https://bford.info/cachedir/
     """
-    cachedir_tag = pathlib.Path(cache()) / 'CACHEDIR.TAG'
-    try:
-        if not cachedir_tag.exists():
-            with cachedir_tag.open('w', encoding='utf-8') as f:
+    cachedir_tag = os.path.join(cache(), 'CACHEDIR.TAG')
+    if not os.path.exists(cachedir_tag):
+        try:
+            with open(cachedir_tag, 'w', encoding='utf-8') as f:
                 f.write("Signature: 8a477f597d28d172789f06886806bc55\n")
                 f.write("# This file is a cache directory tag created by "
                         "qutebrowser.\n")
                 f.write("# For information about cache directory tags, see:\n")
                 f.write("#  https://bford.info/cachedir/\n")
-    except OSError:
-        log.init.exception("Failed to create CACHEDIR.TAG")
+        except OSError:
+            log.init.exception("Failed to create CACHEDIR.TAG")
