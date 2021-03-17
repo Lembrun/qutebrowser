@@ -83,7 +83,7 @@ def _init_config(args: Optional[argparse.Namespace]) -> None:
         if utils.is_windows:
             app_data_path = _writable_location(
                 QStandardPaths.AppDataLocation)
-            path = str(pathlib.Path(app_data_path) / 'config')
+            path = os.path.join(app_data_path, 'config')
         else:
             path = _writable_location(typ)
 
@@ -95,7 +95,7 @@ def _init_config(args: Optional[argparse.Namespace]) -> None:
     if utils.is_mac:
         path = _from_args(typ, args)
         if path is None:  # pragma: no branch
-            path = str(pathlib.Path.home() / ('.' + APPNAME))
+            path = os.path.expanduser('~/.' + APPNAME)
             _create(path)
             _locations[_Location.config] = path
 
@@ -133,11 +133,11 @@ def _init_data(args: Optional[argparse.Namespace]) -> None:
     if path is None:
         if utils.is_windows:
             app_data_path = _writable_location(typ)  # same location as config
-            path = str(pathlib.Path(app_data_path) / 'data')
+            path = os.path.join(app_data_path, 'data')
         elif sys.platform.startswith('haiku'):
             # HaikuOS returns an empty value for AppDataLocation
             config_path = _writable_location(QStandardPaths.ConfigLocation)
-            path = str(pathlib.Path(config_path) / 'data')
+            path = os.path.join(config_path, 'data')
         else:
             path = _writable_location(typ)
 
@@ -174,7 +174,7 @@ def _init_cache(args: Optional[argparse.Namespace]) -> None:
         if utils.is_windows:
             # Local, not Roaming!
             data_path = _writable_location(QStandardPaths.AppLocalDataLocation)
-            path = str(pathlib.Path(data_path) / 'cache')
+            path = os.path.join(data_path, 'cache')
         else:
             path = _writable_location(typ)
 
