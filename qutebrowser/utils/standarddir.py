@@ -83,7 +83,7 @@ def _init_config(args: Optional[argparse.Namespace]) -> None:
         if utils.is_windows:
             app_data_path = _writable_location(
                 QStandardPaths.AppDataLocation)
-            path = str(pathlib.Path(app_data_path) / 'config')
+            path = str(pathlib.Path(app_data_path) / 'config').replace(os.sep, '/')
         else:
             path = _writable_location(typ)
 
@@ -95,14 +95,14 @@ def _init_config(args: Optional[argparse.Namespace]) -> None:
     if utils.is_mac:
         path = _from_args(typ, args)
         if path is None:  # pragma: no branch
-            path = str(pathlib.Path.home() / ('.' + APPNAME))
+            path = str(pathlib.Path.home() / ('.' + APPNAME)).replace(os.sep, '/')
             _create(path)
             _locations[_Location.config] = path
 
-    config_py_file = str(pathlib.Path(_locations[_Location.config]) / 'config.py')
+    config_py_file = str(pathlib.Path(_locations[_Location.config]) / 'config.py').replace(os.sep, '/')
     if getattr(args, 'config_py', None) is not None:
         assert args is not None
-        config_py_file = str(pathlib.Path(args.config_py).resolve())
+        config_py_file = str(pathlib.Path(args.config_py).resolve()).replace(os.sep, '/')
     _locations[_Location.config_py] = config_py_file
 
 
@@ -133,11 +133,11 @@ def _init_data(args: Optional[argparse.Namespace]) -> None:
     if path is None:
         if utils.is_windows:
             app_data_path = _writable_location(typ)  # same location as config
-            path = str(pathlib.Path(app_data_path) / 'data')
+            path = str(pathlib.Path(app_data_path) / 'data').replace(os.sep, '/')
         elif sys.platform.startswith('haiku'):
             # HaikuOS returns an empty value for AppDataLocation
             config_path = _writable_location(QStandardPaths.ConfigLocation)
-            path = str(pathlib.Path(config_path) / 'data')
+            path = str(pathlib.Path(config_path) / 'data').replace(os.sep, '/')
         else:
             path = _writable_location(typ)
 
@@ -174,7 +174,7 @@ def _init_cache(args: Optional[argparse.Namespace]) -> None:
         if utils.is_windows:
             # Local, not Roaming!
             data_path = _writable_location(QStandardPaths.AppLocalDataLocation)
-            path = str(pathlib.Path(data_path) / 'cache')
+            path = str(pathlib.Path(data_path) / 'cache').replace(os.sep, '/')
         else:
             path = _writable_location(typ)
 
@@ -301,7 +301,7 @@ def _from_args(
         suffix = basedir_suffix[typ]
     except KeyError:  # pragma: no cover
         return None
-    return str((pathlib.Path(args.basedir) / suffix).resolve())
+    return str((pathlib.Path(args.basedir) / suffix).resolve()).replace(os.sep, '/')
 
 
 def _create(path: str) -> None:
