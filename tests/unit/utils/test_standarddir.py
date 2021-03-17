@@ -352,7 +352,7 @@ class TestCreatingDir:
 
         See https://github.com/qutebrowser/qutebrowser/issues/942.
         """
-        (tmp_path / typ).mkdir()
+        (tmp_path / typ).mkdir(exist_ok=True, parents=True)
 
         m = mocker.patch('qutebrowser.utils.standarddir.pathlib')
         j = mocker.patch('qutebrowser.utils.standarddir.os')
