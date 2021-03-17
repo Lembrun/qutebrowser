@@ -354,14 +354,14 @@ class TestCreatingDir:
         """
         (tmp_path / typ).mkdir()
 
-        m = mocker.patch('qutebrowser.utils.standarddir.pathlib')
-        j = mocker.patch('qutebrowser.utils.standarddir.os')
-        m.Path.mkdir = pathlib.Path.mkdir
-        j.sep = os.sep
-        m.Path = pathlib.Path
-        m.Path.expanduser = pathlib.Path.expanduser
-        m.Path.exists.return_value = False
-        m.Path.resolve = lambda x: x
+        m = mocker.patch('qutebrowser.utils.standarddir.pathlib.Path', autospec=True)
+        #j = mocker.patch('qutebrowser.utils.standarddir.os')
+        #m.Path.mkdir = pathlib.Path.mkdir
+        #j.sep = os.sep
+        #m.Path = pathlib.Path
+        #m.Path.expanduser = pathlib.Path.expanduser
+        m.exists.return_value = False
+        #m.Path.resolve = pathlib.Path.resolve
 
         args = types.SimpleNamespace(basedir=str(tmp_path))
         standarddir._init_dirs(args)
