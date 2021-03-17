@@ -287,16 +287,16 @@ class TestInitCacheDirTag:
 
     """Tests for _init_cachedir_tag."""
 
-    def test_existent_cache_dir_tag(self, tmpdir, mocker, monkeypatch):
+    def test_existent_cache_dir_tag(self, tmp_path, mocker, monkeypatch):
         """Test with an existent CACHEDIR.TAG."""
-        monkeypatch.setattr(standarddir, 'cache', lambda: str(tmpdir))
+        monkeypatch.setattr(standarddir, 'cache', lambda: str(tmp_path))
         mocker.patch('builtins.open', side_effect=AssertionError)
         m = mocker.patch('qutebrowser.utils.standarddir.os')
         m.path.join.side_effect = os.path.join
         m.path.exists.return_value = True
         standarddir._init_cachedir_tag()
-        assert not tmpdir.listdir()
-        m.path.exists.assert_called_with(str(tmpdir / 'CACHEDIR.TAG'))
+        assert not list(tmp_path.iterdir())
+        m.path.exists.assert_called_with(str(tmp_path / 'CACHEDIR.TAG'))
 
     def test_new_cache_dir_tag(self, tmp_path, mocker, monkeypatch):
         """Test creating a new CACHEDIR.TAG."""
@@ -348,12 +348,12 @@ class TestCreatingDir:
                 assert (basedir / typ).stat().st_mode & 0o777 == 0o700
 
     @pytest.mark.parametrize('typ', DIR_TYPES)
-    def test_exists_race_condition(self, mocker, tmpdir, typ):
+    def test_exists_race_condition(self, mocker, tmp_path, typ):
         """Make sure there can't be a TOCTOU issue when creating the file.
 
         See https://github.com/qutebrowser/qutebrowser/issues/942.
         """
-        (tmpdir / typ).ensure(dir=True)
+        (tmp_path / typ).mkdir()
 
         m = mocker.patch('qutebrowser.utils.standarddir.os')
         m.makedirs = os.makedirs
@@ -363,7 +363,7 @@ class TestCreatingDir:
         m.path.exists.return_value = False
         m.path.abspath = lambda x: x
 
-        args = types.SimpleNamespace(basedir=str(tmpdir))
+        args = types.SimpleNamespace(basedir=str(tmp_path))
         standarddir._init_dirs(args)
 
         func = getattr(standarddir, typ)
@@ -375,18 +375,18 @@ class TestSystemData:
     """Test system data path."""
 
     @pytest.mark.linux
-    def test_system_datadir_exist_linux(self, monkeypatch, tmpdir):
+    def test_system_datadir_exist_linux(self, monkeypatch, tmp_path):
         """Test that /usr/share/qute_test is used if path exists."""
-        monkeypatch.setenv('XDG_DATA_HOME', str(tmpdir))
+        monkeypatch.setenv('XDG_DATA_HOME', str(tmp_path))
         monkeypatch.setattr(os.path, 'exists', lambda path: True)
         standarddir._init_data(args=None)
         assert standarddir.data(system=True) == "/usr/share/qute_test"
 
     @pytest.mark.linux
-    def test_system_datadir_not_exist_linux(self, monkeypatch, tmpdir,
+    def test_system_datadir_not_exist_linux(self, monkeypatch, tmp_path,
                                             fake_args):
         """Test that system-wide path isn't used on linux if path not exist."""
-        fake_args.basedir = str(tmpdir)
+        fake_args.basedir = str(tmp_path)
         monkeypatch.setattr(os.path, 'exists', lambda path: False)
         standarddir._init_data(args=fake_args)
         assert standarddir.data(system=True) == standarddir.data()
