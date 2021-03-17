@@ -140,7 +140,7 @@ class TestWritableLocation:
     def test_sep(self, monkeypatch):
         """Make sure the right kind of separator is used."""
         monkeypatch.setattr(standarddir.os, 'sep', '\\')
-        monkeypatch.setattr(standarddir.pathlib.Path, 'joinpath',
+        monkeypatch.setattr(standarddir.pathlib, 'Path',
                             lambda *parts: '\\'.join(parts))
         loc = standarddir._writable_location(QStandardPaths.AppDataLocation)
         assert '/' not in loc
@@ -357,7 +357,7 @@ class TestCreatingDir:
 
         m = mocker.patch('qutebrowser.utils.standarddir.pathlib')
         m.Path.mkdir = pathlib.Path.mkdir
-        m.sep = '/'
+        m.sep = os.sep
         m.Path.joinpath = pathlib.Path.joinpath
         m.Path.expanduser = pathlib.Path.expanduser
         m.Path.exists.return_value = False
