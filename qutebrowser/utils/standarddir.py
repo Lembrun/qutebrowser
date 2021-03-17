@@ -270,7 +270,7 @@ def _writable_location(typ: QStandardPaths.StandardLocation) -> str:
     # QStandardsPaths not knowing the application name).
     if (typ != QStandardPaths.DownloadLocation and
             path.split(os.sep)[-1] != APPNAME):
-        path = str(pathlib.Path(path) / APPNAME).replace('/', os.sep)
+        path = str(pathlib.Path(path) / APPNAME)
 
     return path
 

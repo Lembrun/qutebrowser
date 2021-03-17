@@ -358,7 +358,7 @@ class TestCreatingDir:
         j = mocker.patch('qutebrowser.utils.standarddir.os')
         m.Path.mkdir = pathlib.Path.mkdir
         j.sep = os.sep
-        m.Path.join = pathlib.Path
+        m.Path = pathlib.Path
         m.Path.expanduser = pathlib.Path.expanduser
         m.Path.exists.return_value = False
         m.Path.resolve = lambda x: x
