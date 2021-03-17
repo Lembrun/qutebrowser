@@ -88,8 +88,8 @@ def _init_config(args: Optional[argparse.Namespace]) -> None:
             path = _writable_location(typ)
 
     _create(path)
-    _locations[_Location.config] = path
-    _locations[_Location.auto_config] = path
+    _locations[_Location.config] = str(path)
+    _locations[_Location.auto_config] = str(path)
 
     # Override the normal (non-auto) config on macOS
     if utils.is_mac:
@@ -141,15 +141,15 @@ def _init_data(args: Optional[argparse.Namespace]) -> None:
         else:
             path = _writable_location(typ)
 
-    _create(path)
-    _locations[_Location.data] = path
+    _create(str(path))
+    _locations[_Location.data] = str(path)
 
     # system_data
     _locations.pop(_Location.system_data, None)  # Remove old state
     if utils.is_linux:
         path = '/usr/share/' + APPNAME
         if pathlib.Path(path).exists():
-            _locations[_Location.system_data] = path
+            _locations[_Location.system_data] = str(path)
 
 
 def data(system: bool = False) -> str:
@@ -179,7 +179,7 @@ def _init_cache(args: Optional[argparse.Namespace]) -> None:
             path = _writable_location(typ)
 
     _create(path)
-    _locations[_Location.cache] = path
+    _locations[_Location.cache] = str(path)
 
 
 def cache() -> str:
