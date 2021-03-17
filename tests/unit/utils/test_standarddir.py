@@ -141,7 +141,7 @@ class TestWritableLocation:
     def test_sep(self, monkeypatch):
         """Make sure the right kind of separator is used."""
         monkeypatch.setattr(standarddir.os, 'sep', '\\')
-        monkeypatch.setattr(standarddir.os.path, 'join',
+        monkeypatch.setattr(standarddir.pathlib, 'Path',
                             lambda *parts: '\\'.join(parts))
         loc = standarddir._writable_location(QStandardPaths.AppDataLocation)
         assert '/' not in loc
