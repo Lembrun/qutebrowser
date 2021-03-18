@@ -175,7 +175,7 @@ def _init_cache(args: Optional[argparse.Namespace]) -> None:
         if utils.is_windows:
             # Local, not Roaming!
             data_path = _writable_location(QStandardPaths.AppLocalDataLocation)
-            path = str(pathlib.Path(data_path / 'cache')
+            path = str(pathlib.Path(data_path) / 'cache')
         else:
             path = _writable_location(typ)
 
