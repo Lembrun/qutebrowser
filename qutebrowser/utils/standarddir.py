@@ -302,7 +302,7 @@ def _from_args(
         suffix = basedir_suffix[typ]
     except KeyError:  # pragma: no cover
         return None
-    return str((pathlib.Path(args.basedir) / suffix).resolve())
+    return os.path.abspath(os.path.join(args.basedir, suffix))
 
 
 def _create(path: str) -> None:
