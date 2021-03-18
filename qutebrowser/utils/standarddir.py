@@ -84,7 +84,7 @@ def _init_config(args: Optional[argparse.Namespace]) -> None:
         if utils.is_windows:
             app_data_path = _writable_location(
                 QStandardPaths.AppDataLocation)
-            path = os.path.join(app_data_path, 'config')
+            path = str(pathlib.Path(app_data_path) / 'config')
         else:
             path = _writable_location(typ)
 
@@ -100,7 +100,7 @@ def _init_config(args: Optional[argparse.Namespace]) -> None:
             _create(path)
             _locations[_Location.config] = path
 
-    config_py_file = os.path.join(_locations[_Location.config], 'config.py')
+    config_py_file = str(pathlib.Path(_locations[_Location.config]) / 'config.py')
     if getattr(args, 'config_py', None) is not None:
         assert args is not None
         config_py_file = os.path.abspath(args.config_py)
@@ -360,4 +360,4 @@ def _init_cachedir_tag() -> None:
                 f.write("# For information about cache directory tags, see:\n")
                 f.write("#  https://bford.info/cachedir/\n")
     except OSError:
-           log.init.exception("Failed to create CACHEDIR.TAG")
+        log.init.exception("Failed to create CACHEDIR.TAG")
