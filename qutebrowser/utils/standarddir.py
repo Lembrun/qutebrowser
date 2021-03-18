@@ -134,7 +134,7 @@ def _init_data(args: Optional[argparse.Namespace]) -> None:
     if path is None:
         if utils.is_windows:
             app_data_path = _writable_location(typ)  # same location as config
-            path = os.path.join(app_data_path, 'data')
+            path = str(pathlib.Path(app_data_path) / 'data')
         elif sys.platform.startswith('haiku'):
             # HaikuOS returns an empty value for AppDataLocation
             config_path = _writable_location(QStandardPaths.ConfigLocation)
@@ -320,7 +320,7 @@ def _create(path: str) -> None:
                 log.init.debug(f"{k} = {v}")
         raise Exception("Trying to create directory inside /home during "
                         "tests, this should not happen.")
-    os.makedirs(path, 0o700, exist_ok=True)
+    pathlib.Path(path).mkdir(0o700, exist_ok=True)
 
 
 def _init_dirs(args: argparse.Namespace = None) -> None:
