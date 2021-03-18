@@ -103,7 +103,7 @@ def _init_config(args: Optional[argparse.Namespace]) -> None:
     config_py_file = str(pathlib.Path(_locations[_Location.config]) / 'config.py')
     if getattr(args, 'config_py', None) is not None:
         assert args is not None
-        config_py_file = os.path.abspath(args.config_py)
+        config_py_file = str(pathlib.Path(args.config_py).resolve())
     _locations[_Location.config_py] = config_py_file
 
 
