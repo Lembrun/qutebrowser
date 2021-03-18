@@ -303,7 +303,7 @@ def _from_args(
     except KeyError:  # pragma: no cover
         return None
     if utils.is_windows:
-        return os.path.abspath(os.path.join(args.basedir, suffix))
+        return os.path.abspath(pathlib.Path(args.basedir) / suffix)
     return str((pathlib.Path(args.basedir) / suffix).resolve())
 
 
