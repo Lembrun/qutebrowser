@@ -96,7 +96,7 @@ def _init_config(args: Optional[argparse.Namespace]) -> None:
     if utils.is_mac:
         path = _from_args(typ, args)
         if path is None:  # pragma: no branch
-            path = os.path.expanduser('~/.' + APPNAME)
+            path = str(pathlib.Path.home() / ('.' + APPNAME))
             _create(path)
             _locations[_Location.config] = path
 
