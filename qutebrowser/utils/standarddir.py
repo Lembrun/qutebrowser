@@ -320,7 +320,7 @@ def _create(path: str) -> None:
                 log.init.debug(f"{k} = {v}")
         raise Exception("Trying to create directory inside /home during "
                         "tests, this should not happen.")
-    pathlib.Path(path).mkdir(0o700, exist_ok=True)
+    pathlib.Path(path).mkdir(0o700, exist_ok=True, parents=True)
 
 
 def _init_dirs(args: argparse.Namespace = None) -> None:
