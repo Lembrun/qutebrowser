@@ -180,11 +180,10 @@ def pytest_collection_modifyitems(config, items):
     config.hook.pytest_deselected(items=deselected_items)
     items[:] = remaining_items
 
-
-def pytest_ignore_collect(path):
+def pytest_ignore_collect(fspath):
     """Ignore BDD tests if we're unable to run them."""
     skip_bdd = hasattr(sys, 'frozen')
-    rel_path = path.relto(str(pathlib.Path(__file__).parent))
+    rel_path = fspath.is_relative_to(pathlib.Path(__file__).parent)
     return rel_path == pathlib.Path('end2end') / 'end2end' and skip_bdd
 
 
