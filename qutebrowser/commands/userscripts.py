@@ -451,10 +451,10 @@ def run_async(tab, cmd, *args, win_id, env, verbose=False,
 
     # if cmd is not given as an absolute path, look it up
     # ~/.local/share/qutebrowser/userscripts (or $XDG_DATA_HOME)
-    if not cmd_path.is_absolute():
+    if not os.path.isabs(cmd_path)::
         log.misc.debug("{} is no absolute path".format(cmd_path))
         cmd_path = _lookup_path(cmd)
-    elif not cmd_path.exists():
+    elif not os.path.exists(cmd_path):
         raise NotFoundError(cmd_path)
     log.misc.debug("Userscript to run: {}".format(cmd_path))
 
