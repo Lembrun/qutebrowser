@@ -447,7 +447,7 @@ def run_async(tab, cmd, *args, win_id, env, verbose=False,
                                               window=win_id).text()
     env['QUTE_VERSION'] = qutebrowser.__version__
 
-    cmd_path = pathlib.Path(cmd).expanduser()
+    cmd_path = os.path.expanduser(cmd)
 
     # if cmd is not given as an absolute path, look it up
     # ~/.local/share/qutebrowser/userscripts (or $XDG_DATA_HOME)
