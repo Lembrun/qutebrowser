@@ -242,7 +242,7 @@ class TestPDFJSHandler:
 
         expected = 'pdfjs resource requested but not found: /no/file.html'
         # replace for windows
-        assert caplog.messages[0].replace(os.sep, "/") == [expected]
+        assert [caplog.messages[0].replace(os.sep, "/")] == [expected]
 
     def test_viewer_page(self, data_tmpdir):
         """Load the /web/viewer.html page."""
