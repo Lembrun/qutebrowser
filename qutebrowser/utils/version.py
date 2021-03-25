@@ -23,6 +23,7 @@ import re
 import sys
 import glob
 import os.path
+import pathlib
 import platform
 import subprocess
 import importlib
@@ -466,7 +467,7 @@ def _pdfjs_version() -> str:
         A string with the version number.
     """
     try:
-        pdfjs_file, file_path = pdfjs.get_pdfjs_res_and_path('build/pdf.js')
+        pdfjs_file, file_path = pdfjs.get_pdfjs_res_and_path(pathlib.Path('build/pdf.js'))
     except pdfjs.PDFJSNotFound:
         return 'no'
     else:
@@ -478,7 +479,7 @@ def _pdfjs_version() -> str:
         match = version_re.search(pdfjs_file)
         pdfjs_version = 'unknown' if not match else match.group('version')
         if file_path is None:
-            file_path = 'bundled'
+            file_path = pathlib.Path('bundled')
 
         return '{} ({})'.format(pdfjs_version, file_path)
 

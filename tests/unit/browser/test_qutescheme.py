@@ -47,8 +47,9 @@ class TestJavascriptHandler:
         """Patch resources.read_file to return few fake JS files."""
         def _read_file(path):
             """Faked resources.read_file."""
+            path = pathlib.Path(path)
             for filename, content in self.js_files:
-                if path == str(pathlib.Path('javascript') / filename):
+                if path == pathlib.Path('javascript') / filename:
                     return content
             raise OSError("File not found {}!".format(path))
 
