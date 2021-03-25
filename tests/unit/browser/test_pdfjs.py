@@ -87,7 +87,7 @@ class TestResources:
         assert pdfjs.get_pdfjs_res('web/test') == b'content'
 
         read_system_mock.assert_called_with(pathlib.Path('/usr/share/pdf.js/'),
-                                            ['web/test', pathlib.Path('test')])
+                                            [pathlib.Path('web/test'), pathlib.Path('test')])
 
     def test_get_pdfjs_res_bundled(self, read_system_mock, read_file_mock,
                                    tmp_path):

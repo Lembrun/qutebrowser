@@ -184,7 +184,7 @@ def _remove_prefix(path: pathlib.Path) -> pathlib.Path:
     if any(str(path).startswith(prefix) for prefix in prefixes):
         return pathlib.Path(str(path).split('/', maxsplit=1)[1])
     # Return the unchanged path if no prefix is found
-    return pathlib.Path(path)
+    return path
 
 
 def _read_from_system(
@@ -207,7 +207,7 @@ def _read_from_system(
     """
     for name in names:
         try:
-            full_path = pathlib.Path(system_path) / name
+            full_path = system_path / name
             with full_path.open('rb') as f:
                 return (f.read(), full_path)
         except FileNotFoundError:
