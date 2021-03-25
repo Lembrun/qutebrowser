@@ -186,7 +186,7 @@ class TestPDFJSHandler:
     @pytest.fixture(autouse=True)
     def fake_pdfjs(self, monkeypatch):
         def get_pdfjs_res(path):
-            if path == '/existing/file.html':
+            if path == pathlib.Path('/existing/file.html'):
                 return b'foobar'
             raise pdfjs.PDFJSNotFound(path)
 
