@@ -47,7 +47,7 @@ def get_file_list(
     """
     items = []
     for filename in all_files:
-        absname = basedir / filename
+        absname = pathlib.Path(basedir) / filename
         if filterfunc(absname):
             items.append({'name': filename.name, 'absname': str(absname)})
     return sorted(items, key=lambda v: v['name'].lower())
@@ -79,7 +79,7 @@ def dirbrowser_html(path: pathlib.Path) -> bytes:
     if is_root(path):
         parent = None
     else:
-        parent = path.parent
+        parent = pathlib.Path(path).parent
 
     try:
         all_files = list(path.iterdir())
