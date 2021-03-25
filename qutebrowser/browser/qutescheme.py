@@ -550,8 +550,8 @@ def qute_pdfjs(url: QUrl) -> _HandlerRet:
                 raise UrlInvalidError("Missing source")
             raise Redirect(QUrl(source))
 
-        data = pdfjs.generate_pdfjs_page(filename, url) # type: ignore
-        return 'text/html', data
+        data_text = pdfjs.generate_pdfjs_page(filename, url)
+        return 'text/html', data_text
 
     try:
         data = pdfjs.get_pdfjs_res(pathlib.Path(url.path()))

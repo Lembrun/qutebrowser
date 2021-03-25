@@ -183,7 +183,7 @@ def _remove_prefix(path: pathlib.Path) -> pathlib.Path:
     """
     prefixes = {'web/', 'build/'}
     if any(str(path).startswith(prefix) for prefix in prefixes):
-        return pathlib.Path(str(path).split('/', maxsplit=1)[1])
+        return pathlib.Path((str(path).replace('\\', '/')).split('/', maxsplit=1)[1])
     # Return the unchanged path if no prefix is found
     return path
 
