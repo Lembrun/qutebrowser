@@ -83,11 +83,13 @@ class TestResources:
     def test_get_pdfjs_res_system(self, read_system_mock):
         read_system_mock.return_value = (b'content', 'path')
 
-        assert pdfjs.get_pdfjs_res_and_path(pathlib.Path('web/test')) == (b'content', 'path')
+        assert pdfjs.get_pdfjs_res_and_path(
+            pathlib.Path('web/test')) == (b'content', 'path')
         assert pdfjs.get_pdfjs_res(pathlib.Path('web/test')) == b'content'
 
         read_system_mock.assert_called_with(pathlib.Path('/usr/share/pdf.js/'),
-                                            [pathlib.Path('web/test'), pathlib.Path('test')])
+                                            [pathlib.Path('web/test'),
+                                             pathlib.Path('test')])
 
     def test_get_pdfjs_res_bundled(self, read_system_mock, read_file_mock,
                                    tmp_path):
@@ -104,7 +106,8 @@ class TestResources:
                      tmp_path / 'data' / 'pdfjs',
                      # hardcoded for --temp-basedir
                      pathlib.Path.home() / '.local/share/qutebrowser/pdfjs/']:
-            read_system_mock.assert_any_call(path, [pathlib.Path('web/test'), pathlib.Path('test')])
+            read_system_mock.assert_any_call(path, [pathlib.Path('web/test'),
+                                                    pathlib.Path('test')])
 
     def test_get_pdfjs_res_not_found(self, read_system_mock, read_file_mock,
                                      caplog):

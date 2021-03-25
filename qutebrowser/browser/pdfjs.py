@@ -130,6 +130,7 @@ def get_pdfjs_res_and_path(
     Args:
         path: The path inside the pdfjs directory.
     """
+    # see if can avoid union opt str
     content = None
     file_path = None
     data_path = pathlib.Path(standarddir.data())
