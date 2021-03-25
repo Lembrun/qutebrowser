@@ -181,7 +181,7 @@ def _remove_prefix(path: pathlib.Path) -> pathlib.Path:
     Args:
         path: Path as string where the prefix should be stripped off.
     """
-    prefixes = {'web/', 'build/'}
+    prefixes = {'web', 'build'}
     if any(str(path).startswith(prefix) for prefix in prefixes):
         return pathlib.Path((str(path).replace('\\', '/')).split('/', maxsplit=1)[1])
     # Return the unchanged path if no prefix is found
