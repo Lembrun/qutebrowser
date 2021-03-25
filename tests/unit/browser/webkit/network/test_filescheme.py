@@ -210,7 +210,7 @@ class TestDirbrowserHtml:
 
         parsed = parser(tmp_path)
         foo_item = self.Item(_file_url(foo_file),
-                             str(foo_file.relative_to(str(tmp_path))))
+                             str(foo_file.relative_to(tmp_path)))
         bar_item = self.Item(_file_url(bar_dir),
                              str(bar_dir.relative_to(tmp_path)))
         assert parsed.parent
@@ -220,7 +220,7 @@ class TestDirbrowserHtml:
     def test_root_dir(self, tmp_path, parser):
         root_dir = pathlib.Path('C:\\') if utils.is_windows else pathlib.Path('/')
         parsed = parser(root_dir)
-        assert parsed.parent == '..'
+        assert not parsed.parent
 
     def test_oserror(self, mocker):
         m = mocker.patch('qutebrowser.browser.webkit.network.filescheme.'

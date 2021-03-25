@@ -79,7 +79,7 @@ def dirbrowser_html(path: pathlib.Path) -> bytes:
     if is_root(path):
         parent = None
     else:
-        parent = pathlib.Path(path).parent
+        parent = str(path.parent)
 
     try:
         all_files = list(path.iterdir())
@@ -92,7 +92,7 @@ def dirbrowser_html(path: pathlib.Path) -> bytes:
     files = get_file_list(path, all_files, pathlib.Path.is_file)
     directories = get_file_list(path, all_files, pathlib.Path.is_dir)
     html = jinja.render('dirbrowser.html', title=title, url=str(path),
-                        parent=str(parent), files=files, directories=directories)
+                        parent=parent, files=files, directories=directories)
     return html.encode('UTF-8', errors='xmlcharrefreplace')
 
 
