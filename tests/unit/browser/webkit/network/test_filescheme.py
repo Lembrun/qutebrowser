@@ -77,7 +77,7 @@ class TestIsRoot:
         ('/', True)
     ])
     def test_posix(self, directory, is_root):
-        assert filescheme.is_root(directory) == is_root
+        assert filescheme.is_root(pathlib.Path(directory)) == is_root
 
 
 def _file_url(path):
