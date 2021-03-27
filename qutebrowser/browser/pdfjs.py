@@ -152,7 +152,7 @@ def get_pdfjs_res_and_path(
 
     # Fallback to bundled pdf.js
     if content is None:
-        res_path = '3rdparty/pdfjs/{}'.format(path)
+        res_path = '3rdparty/pdfjs/{}'.format(path).replace('\\', '/')
         try:
             content = resources.read_file_binary(res_path)
         except FileNotFoundError:
@@ -178,7 +178,7 @@ def _remove_prefix(path: pathlib.Path) -> pathlib.Path:
     """Remove the web/ or build/ prefix of a pdfjs-file-path.
 
     Args:
-        path: Path as string where the prefix should be stripped off.
+        path: Path as a pathlib.Path where the prefix should be stripped off.
     """
     prefixes = {'web', 'build'}
     for prefix in prefixes:
