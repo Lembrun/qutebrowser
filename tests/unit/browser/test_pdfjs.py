@@ -114,8 +114,9 @@ class TestResources:
         read_system_mock.return_value = (None, None)
         read_file_mock.side_effect = FileNotFoundError
 
+        web_path = pathlib.Path('web/test')
         with pytest.raises(pdfjs.PDFJSNotFound,
-                           match="Path 'web/test' not found"):
+                           match=f"Path {str(web_path)} not found"):
             pdfjs.get_pdfjs_res_and_path(pathlib.Path('web/test'))
 
         assert not caplog.records
@@ -125,10 +126,11 @@ class TestResources:
         read_system_mock.return_value = (None, None)
         read_file_mock.side_effect = OSError("Message")
 
+        web_path = pathlib.Path('web/test')
         with caplog.at_level(logging.WARNING):
             with pytest.raises(pdfjs.PDFJSNotFound,
-                               match="Path 'web/test' not found"):
-                pdfjs.get_pdfjs_res_and_path(pathlib.Path('web/test'))
+                               match=f"Path {str(web_path)} not found"):
+                pdfjs.get_pdfjs_res_and_path(web_path)
 
         expected = 'OSError while reading PDF.js file: Message'
         assert caplog.messages == [expected]
