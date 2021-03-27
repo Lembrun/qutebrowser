@@ -115,10 +115,9 @@ class TestResources:
         read_file_mock.side_effect = FileNotFoundError
 
         web_path = pathlib.Path('web/test')
-        breakpoint()
         with pytest.raises(pdfjs.PDFJSNotFound,
                            match="Path '{}' not found".format(web_path)):
-            pdfjs.get_pdfjs_res_and_path(pathlib.Path('web/test'))
+            pdfjs.get_pdfjs_res_and_path(web_path)
 
         assert not caplog.records
 
