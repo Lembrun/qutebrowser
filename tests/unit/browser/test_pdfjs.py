@@ -20,7 +20,6 @@
 import logging
 import pathlib
 import os
-import re
 
 import pytest
 from PyQt5.QtCore import QUrl
@@ -117,7 +116,7 @@ class TestResources:
 
         web_path = pathlib.Path('web/test')
         with pytest.raises(pdfjs.PDFJSNotFound,
-                           match=re.escape("Path '{}' not found".format(web_path))):
+                           match=f"Path '{web_path}' not found":
             pdfjs.get_pdfjs_res_and_path(web_path)
 
         assert not caplog.records
@@ -130,7 +129,7 @@ class TestResources:
         web_path = pathlib.Path('web/test')
         with caplog.at_level(logging.WARNING):
             with pytest.raises(pdfjs.PDFJSNotFound,
-                               match=re.escape("Path '{}' not found".format(web_path))):
+                               match=f"Path '{web_path}' not found":
                 pdfjs.get_pdfjs_res_and_path(web_path)
 
         expected = 'OSError while reading PDF.js file: Message'
