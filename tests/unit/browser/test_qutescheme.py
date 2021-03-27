@@ -241,7 +241,7 @@ class TestPDFJSHandler:
                 qutescheme.data_for_url(QUrl('qute://pdfjs/no/file.html'))
 
         expected = 'pdfjs resource requested but not found: /no/file.html'
-        # replace for windows
+        # replace separator for windows
         assert [caplog.messages[0].replace(os.sep, "/")] == [expected]
 
     def test_viewer_page(self, data_tmpdir):

@@ -116,7 +116,7 @@ class TestResources:
 
         with pytest.raises(pdfjs.PDFJSNotFound,
                            match="Path 'web/test' not found"):
-            pdfjs.get_pdfjs_res_and_path('web/test')
+            pdfjs.get_pdfjs_res_and_path(pathlib.Path('web/test'))
 
         assert not caplog.records
 
@@ -128,7 +128,7 @@ class TestResources:
         with caplog.at_level(logging.WARNING):
             with pytest.raises(pdfjs.PDFJSNotFound,
                                match="Path 'web/test' not found"):
-                pdfjs.get_pdfjs_res_and_path('web/test')
+                pdfjs.get_pdfjs_res_and_path(pathlib.Path('web/test'))
 
         expected = 'OSError while reading PDF.js file: Message'
         assert caplog.messages == [expected]

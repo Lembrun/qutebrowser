@@ -72,8 +72,8 @@ def generate_pdfjs_page(filename: str, url: QUrl) -> str:
                             url=url.toDisplayString(),
                             title="PDF.js not found",
                             pdfjs_dir=str(pdfjs_dir))
-    web = pathlib.Path("web/viewer.html")
-    html = get_pdfjs_res(web).decode('utf-8')
+    web_path = pathlib.Path("web/viewer.html")
+    html = get_pdfjs_res(web_path).decode('utf-8')
 
     script = _generate_pdfjs_script(filename)
     html = html.replace('</body>',
@@ -130,7 +130,6 @@ def get_pdfjs_res_and_path(
     Args:
         path: The path inside the pdfjs directory.
     """
-    # see if can avoid union opt str
     content = None
     file_path = None
     data_path = pathlib.Path(standarddir.data())
@@ -182,8 +181,11 @@ def _remove_prefix(path: pathlib.Path) -> pathlib.Path:
         path: Path as string where the prefix should be stripped off.
     """
     prefixes = {'web', 'build'}
-    if any(str(path).startswith(prefix) for prefix in prefixes):
-        return pathlib.Path((str(path).replace('\\', '/')).split('/', maxsplit=1)[1])
+    for prefix in prefixes:
+        if prefix in path.parts:
+            pref = list(path.parts)
+            pref.remove(prefix)
+            return pathlib.Path(*pref)
     # Return the unchanged path if no prefix is found
     return path
 
@@ -221,11 +223,11 @@ def _read_from_system(
 
 def is_available() -> bool:
     """Return true if a pdfjs installation is available."""
-    build = pathlib.Path("build/pdf.js")
-    web = pathlib.Path("web/viewer.html")
+    build_path = pathlib.Path("build/pdf.js")
+    web_path = pathlib.Path("web/viewer.html")
     try:
-        get_pdfjs_res(build)
-        get_pdfjs_res(web)
+        get_pdfjs_res(build_path)
+        get_pdfjs_res(web_path)
     except PDFJSNotFound:
         return False
     else:

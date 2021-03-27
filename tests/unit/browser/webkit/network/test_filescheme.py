@@ -176,8 +176,10 @@ class TestDirbrowserHtml:
         parsed = parser(tmp_path)
         assert parsed.parent
         assert not parsed.folders
-        foo_item = self.Item(_file_url(foo_file), str(foo_file.relative_to(tmp_path)))
-        bar_item = self.Item(_file_url(bar_file), str(bar_file.relative_to(tmp_path)))
+        foo_item = self.Item(_file_url(foo_file),
+                             str(foo_file.relative_to(tmp_path)))
+        bar_item = self.Item(_file_url(bar_file),
+                             str(bar_file.relative_to(tmp_path)))
         assert parsed.files == [bar_item, foo_item]
 
     def test_html_special_chars(self, tmp_path, parser):
@@ -198,8 +200,10 @@ class TestDirbrowserHtml:
         parsed = parser(tmp_path)
         assert parsed.parent
         assert not parsed.files
-        foo_item = self.Item(_file_url(foo_dir), str(foo_dir.relative_to(tmp_path)))
-        bar_item = self.Item(_file_url(bar_dir), str(bar_dir.relative_to(tmp_path)))
+        foo_item = self.Item(_file_url(foo_dir),
+                             str(foo_dir.relative_to(tmp_path)))
+        bar_item = self.Item(_file_url(bar_dir),
+                             str(bar_dir.relative_to(tmp_path)))
         assert parsed.folders == [bar_item, foo_item]
 
     def test_mixed(self, tmp_path, parser):
@@ -218,7 +222,8 @@ class TestDirbrowserHtml:
         assert parsed.folders == [bar_item]
 
     def test_root_dir(self, tmp_path, parser):
-        root_dir = pathlib.Path('C:\\') if utils.is_windows else pathlib.Path('/')
+        root_dir = (pathlib.Path('C:\\')
+        if utils.is_windows else pathlib.Path('/'))
         parsed = parser(root_dir)
         assert not parsed.parent
 
@@ -242,9 +247,6 @@ class TestFileSchemeHandler:
         url = QUrl.fromLocalFile(str(tmp_path))
         req = QNetworkRequest(url)
         reply = filescheme.handler(req, None, None)
-        # The URL will always use /, even on Windows - so we force this here
-        # too.
-        #tmpdir_path = str(tmp_path).replace(os.sep, '/')
         tmpdir_path = tmp_path
         assert reply.readAll() == filescheme.dirbrowser_html(tmpdir_path)
 
