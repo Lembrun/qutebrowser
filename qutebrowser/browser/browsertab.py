@@ -1138,7 +1138,7 @@ class AbstractTab(QWidget):
     def load_status(self) -> usertypes.LoadStatus:
         return self._load_status
 
-    def _load_url_prepare(self, url: Union[QUrl,List[QUrl]]) -> None:
+    def _load_url_prepare(self, url: Union[QUrl, List[QUrl]]) -> None:
         if isinstance(url, list):
             for u in url:
                 qtutils.ensure_valid(u)

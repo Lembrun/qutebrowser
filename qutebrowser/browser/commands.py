@@ -1268,6 +1268,7 @@ class CommandDispatcher:
             else:
                 msg = "Bookmarked {}" if was_added else "Removed bookmark {}"
                 message.info(msg.format(url.toDisplayString()))
+
     @cmdutils.register(instance='command-dispatcher', scope='window',
                        maxsplit=0)
     @cmdutils.argument('url', completion=miscmodels.bookmark)

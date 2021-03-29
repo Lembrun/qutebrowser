@@ -131,8 +131,9 @@ def _get_search_url(txt: str) -> List[QUrl]:
     engines, term = _parse_search_term(txt)
     if not engines:
         engines = ['DEFAULT']
+
+    urls = []
     if term:
-        urls = []
         for x in engines:
             template = config.val.url.searchengines[x]
             semiquoted_term = urllib.parse.quote(term)
@@ -144,10 +145,9 @@ def _get_search_url(txt: str) -> List[QUrl]:
             url = QUrl.fromUserInput(evaluated)
             qtutils.ensure_valid(url)
             urls.append(url)
-        return urls
     else:
-        url = QUrl.fromUserInput(config.val.url.searchengines[engines[0]])
-        urls = [url]
+        urls.append(QUrl.fromUserInput(
+            config.val.url.searchengines[engines[0]]))
         for u in urls:
             u.setPath(None)  # type: ignore[arg-type]
             u.setFragment(None)  # type: ignore[arg-type]
