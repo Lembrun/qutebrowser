@@ -338,7 +338,7 @@ def _open_startpage(win_id=None):
         if tabbed_browser.widget.count() == 0:
             log.init.debug("Opening start pages")
             for url in config.val.url.start_pages:
-                tabbed_browser.tabopen(url)
+                tabbed_browser.tabopen(url[0])
 
 
 def _open_special_pages(args):

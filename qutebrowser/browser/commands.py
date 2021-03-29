@@ -303,7 +303,8 @@ class CommandDispatcher:
             private: Open a new window in private browsing mode.
         """
         if url is None:
-            urls = [config.val.url.default_page]
+            # not list cuz already one
+            urls = config.val.url.default_page
         else:
             urls = self._parse_url_input(url)
 
@@ -380,11 +381,8 @@ class CommandDispatcher:
         for cur_url in urllist:
             parsed = self._parse_url(cur_url, force_search=force_search)
             if parsed is not None:
-                if isinstance(parsed, list):
-                    for urls in parsed:
-                        yield urls
-                else:
-                    yield parsed
+                for urls in parsed:
+                    yield urls
 
     @cmdutils.register(instance='command-dispatcher', scope='window')
     def tab_clone(self, bg=False, window=False):
