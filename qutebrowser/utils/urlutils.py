@@ -146,12 +146,14 @@ def _get_search_url(txt: str) -> List[QUrl]:
             urls.append(url)
         return urls
     else:
-        url = [QUrl.fromUserInput(config.val.url.searchengines[engines[0]])]
-        url[0].setPath(None)  # type: ignore[arg-type]
-        url[0].setFragment(None)  # type: ignore[arg-type]
-        url[0].setQuery(None)  # type: ignore[call-overload]
-        qtutils.ensure_valid(url[0])
-    return url
+        url = QUrl.fromUserInput(config.val.url.searchengines[engines[0]])
+        urls = [url]
+        for u in urls:
+            u.setPath(None)  # type: ignore[arg-type]
+            u.setFragment(None)  # type: ignore[arg-type]
+            u.setQuery(None)  # type: ignore[call-overload]
+            qtutils.ensure_valid(u)
+    return urls
 
 
 def _is_url_naive(urlstr: str) -> bool:

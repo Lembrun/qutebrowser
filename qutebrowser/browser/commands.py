@@ -1190,7 +1190,11 @@ class CommandDispatcher:
             url = objreg.get('quickmark-manager').get(name)
         except urlmarks.Error as e:
             raise cmdutils.CommandError(str(e))
-        self._open(url, tab, bg, window)
+        #if isinstance(url, list):
+        for u in url:
+            self._open(u, tab, bg, window)
+        #else:
+        #    self._open(url, tab, bg, window)
 
     @cmdutils.register(instance='command-dispatcher', scope='window',
                        maxsplit=0)
@@ -1249,13 +1253,21 @@ class CommandDispatcher:
         if not title:
             title = self._current_title()
         try:
-            was_added = bookmark_manager.add(url, title, toggle=toggle)
+            if isinstance(url, list):
+                for u in url:
+                    was_added = bookmark_manager.add(u, title, toggle=toggle)
+            else:
+                was_added = bookmark_manager.add(url, title, toggle=toggle)
         except urlmarks.Error as e:
             raise cmdutils.CommandError(str(e))
         else:
-            msg = "Bookmarked {}" if was_added else "Removed bookmark {}"
-            message.info(msg.format(url.toDisplayString()))
-
+            if isinstance(url, list):
+                for u in url:
+                    msg = "Bookmarked {}" if was_added else "Removed bookmark {}"
+                    message.info(msg.format(u.toDisplayString()))
+            else:
+                msg = "Bookmarked {}" if was_added else "Removed bookmark {}"
+                message.info(msg.format(url.toDisplayString()))
     @cmdutils.register(instance='command-dispatcher', scope='window',
                        maxsplit=0)
     @cmdutils.argument('url', completion=miscmodels.bookmark)
@@ -1274,7 +1286,8 @@ class CommandDispatcher:
             qurl = urlutils.fuzzy_url(url)
         except urlutils.InvalidUrlError as e:
             raise cmdutils.CommandError(e)
-        self._open(qurl, tab, bg, window)
+        for urls in qurl:
+            self._open(urls, tab, bg, window)
         if delete:
             self.bookmark_del(url)
 
