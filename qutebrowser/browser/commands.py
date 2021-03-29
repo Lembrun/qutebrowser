@@ -1190,11 +1190,8 @@ class CommandDispatcher:
             url = objreg.get('quickmark-manager').get(name)
         except urlmarks.Error as e:
             raise cmdutils.CommandError(str(e))
-        #if isinstance(url, list):
         for u in url:
             self._open(u, tab, bg, window)
-        #else:
-        #    self._open(url, tab, bg, window)
 
     @cmdutils.register(instance='command-dispatcher', scope='window',
                        maxsplit=0)
@@ -1244,7 +1241,7 @@ class CommandDispatcher:
                                         'been provided')
         bookmark_manager = objreg.get('bookmark-manager')
         if not url:
-            url = self._current_url()
+            url = [self._current_url()]
         else:
             try:
                 url = urlutils.fuzzy_url(url)
@@ -1253,21 +1250,14 @@ class CommandDispatcher:
         if not title:
             title = self._current_title()
         try:
-            if isinstance(url, list):
-                for u in url:
-                    was_added = bookmark_manager.add(u, title, toggle=toggle)
-            else:
-                was_added = bookmark_manager.add(url, title, toggle=toggle)
+            for u in url:
+                was_added = bookmark_manager.add(u, title, toggle=toggle)
         except urlmarks.Error as e:
             raise cmdutils.CommandError(str(e))
         else:
-            if isinstance(url, list):
-                for u in url:
-                    msg = "Bookmarked {}" if was_added else "Removed bookmark {}"
-                    message.info(msg.format(u.toDisplayString()))
-            else:
+            for u in url:
                 msg = "Bookmarked {}" if was_added else "Removed bookmark {}"
-                message.info(msg.format(url.toDisplayString()))
+                message.info(msg.format(u.toDisplayString()))
 
     @cmdutils.register(instance='command-dispatcher', scope='window',
                        maxsplit=0)
