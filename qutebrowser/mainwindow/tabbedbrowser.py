@@ -536,11 +536,11 @@ class TabbedBrowser(QWidget):
             newtab: True to open URL in a new tab, False otherwise.
         """
         for u in url:
-               qtutils.ensure_valid(u)
-               if newtab or self.widget.currentWidget() is None:
-                   self.tabopen(u, background=False)
-               else:
-                   self.widget.currentWidget().load_url(u)
+            qtutils.ensure_valid(u)
+            if newtab or self.widget.currentWidget() is None:
+                self.tabopen(u, background=False)
+            else:
+                self.widget.currentWidget().load_url(u)
 
     @pyqtSlot(int)
     def on_tab_close_requested(self, idx):
