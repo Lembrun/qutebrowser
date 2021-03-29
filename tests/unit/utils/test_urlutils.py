@@ -306,6 +306,48 @@ def test_get_search_url(config_stub, url, host, query, open_base_url):
     assert url[0].query() == query
 
 
+@pytest.mark.parametrize('url, host, query', [
+    ('test,test-with-dash testfoo', ['www.qutebrowser.org',
+                                     'www.example.org'], 'q=testfoo'),
+])
+def test_get_search_url_multiple_search_engines(config_stub, url, host, query):
+    """Test _get_search_url() for multiple search engines.
+
+    Args:
+        url: The "URL" to enter.
+        host: The expected search machine host.
+        query: The expected search query.
+    """
+    url = urlutils._get_search_url(url)
+
+    assert url[0].host() == host[0]
+    assert url[1].host() == host[1]
+    assert url[0].query() == query
+
+
+@pytest.mark.parametrize('url, host, query', [
+    ('test,not-a-search-engine testfoo', ['www.qutebrowser.org'], 'q=testfoo'),
+])
+def test_get_search_url_multiple_search_engines_error(
+        config_stub,
+        url,
+        host,
+        query,
+        caplog):
+    """Test _get_search_url() for multiple search engines.
+
+    Args:
+        url: The "URL" to enter.
+        host: The expected search machine host.
+        query: The expected search query.
+    """
+    with caplog.at_level(logging.ERROR):
+        url = urlutils._get_search_url(url)
+
+    assert url[0].host() == host[0]
+    assert url[0].query() == query
+
+
 @pytest.mark.parametrize('open_base_url', [True, False])
 @pytest.mark.parametrize('url, host, path', [
     ('path-search t/w/s', 'www.example.org', 't/w/s'),
