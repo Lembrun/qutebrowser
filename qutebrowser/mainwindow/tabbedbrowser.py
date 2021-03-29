@@ -430,7 +430,7 @@ class TabbedBrowser(QWidget):
             if last_close == 'close':
                 self.close_window.emit()
             elif last_close == 'blank':
-                self.load_url(QUrl('about:blank'), newtab=True)
+                self.load_url([QUrl('about:blank')], newtab=True)
             elif last_close == 'startpage':
                 for url in config.val.url.start_pages:
                     self.load_url(url, newtab=True)
@@ -535,19 +535,12 @@ class TabbedBrowser(QWidget):
             url: The URL to open as QUrl.
             newtab: True to open URL in a new tab, False otherwise.
         """
-        if isinstance(url, list):
-            for u in url:
-                qtutils.ensure_valid(u)
-                if newtab or self.widget.currentWidget() is None:
-                    self.tabopen(u, background=False)
-                else:
-                    self.widget.currentWidget().load_url(u)
-        else:
-            qtutils.ensure_valid(url)
-            if newtab or self.widget.currentWidget() is None:
-                self.tabopen(url, background=False)
-            else:
-                self.widget.currentWidget().load_url(url)
+        for u in url:
+               qtutils.ensure_valid(u)
+               if newtab or self.widget.currentWidget() is None:
+                   self.tabopen(u, background=False)
+               else:
+                   self.widget.currentWidget().load_url(u)
 
     @pyqtSlot(int)
     def on_tab_close_requested(self, idx):
