@@ -84,9 +84,9 @@ def _parse_search_term(s: str) -> Tuple[Optional[str], Optional[str]]:
     """
     s = s.strip()
     split = s.split(maxsplit=1)
-    split_engines = split[0].split(',')
     if not split:
         raise ValueError("Empty search term!")
+    split_engines = split[0].split(',')
 
     if len(split) == 2 and len(split_engines) == 1:
         if split[0] in config.val.url.searchengines:
