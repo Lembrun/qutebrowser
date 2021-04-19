@@ -21,6 +21,7 @@
 
 import os
 import os.path
+import pathlib
 import re
 import sys
 import time
@@ -413,9 +414,9 @@ def clear_ssl_errors(request, quteproc):
 @bdd.when("the documentation is up to date")
 def update_documentation():
     """Update the docs before testing :help."""
-    base_path = os.path.dirname(os.path.abspath(qutebrowser.__file__))
-    doc_path = os.path.join(base_path, 'html', 'doc')
-    script_path = os.path.join(base_path, '..', 'scripts')
+    base_path = pathlib.Path(qutebrowser.__file__).parent
+    doc_path = base_path / 'html' / 'doc'
+    script_path = base_path / '..' / 'scripts'
 
     try:
         os.mkdir(doc_path)
@@ -432,8 +433,8 @@ def update_documentation():
     except OSError:
         pytest.skip("Docs outdated and asciidoc unavailable!")
 
-    update_script = os.path.join(script_path, 'asciidoc2html.py')
-    subprocess.run([sys.executable, update_script], check=True)
+    update_script = script_path / 'asciidoc2html.py'
+    subprocess.run([sys.executable, str(update_script)], check=True)
 
 
 ## Then
