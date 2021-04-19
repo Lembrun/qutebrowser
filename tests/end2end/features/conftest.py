@@ -419,7 +419,7 @@ def update_documentation():
     script_path = base_path / '..' / 'scripts'
 
     try:
-        os.mkdir(doc_path)
+        doc_path.mkdir()
     except FileExistsError:
         pass
 
